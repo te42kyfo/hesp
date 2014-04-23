@@ -1,0 +1,34 @@
+#!/usr/bin/guile \
+-e main -s
+!#
+
+(use-modules (ice-9 pretty-print)
+             (ice-9 format)
+             (ice-9 rdelim))
+
+(setenv "LTDL_LIBRARY_PATH" ".")
+(load-extension "libguile-opencl" "init_guile_opencl")
+
+(define (hesp-print obj)
+  "print identical to reference output"
+  (if (platform? obj)
+      (map (lambda (x) (format #t "~22a = ~a~%" (car x) (cdr x))) (info obj)))
+  (if (device? obj)
+      (map (lambda (x) (format #t "~39a = ~a~%" (car x) (cdr x))) (info obj))))
+
+(define (main args) "hesp - exercise 1"
+  (format #t "Avilable platforms:~%")
+  (let* ((platforms (get-platforms))
+         (plen      (length platforms)))
+    (for-each (lambda (platform id)
+                (format #t "Platform #~d:~%" id)
+                (hesp-print platform) (newline))
+              platforms (iota plen))
+    (format #t "Choose a platform (from 0 to ~d)~%" (1- plen))
+    (let ((platform (list-ref platforms (string->number (read-line)))))
+      (format #t "Using the following platform:~%")
+      (hesp-print platform) (newline)
+      (format #t "Using the following device:~%")
+      (hesp-print (car (get-devices platform)))
+      ; TODO
+      )))

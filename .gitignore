@@ -1,0 +1,11 @@
+# misc files
+*~
+/build*/
+*.o
+*.la
+*.so*
+*.a
+.deps
+*.tar*
+*.zip
+*.rar
