@@ -1,6 +1,6 @@
 #include "guile_opencl.h"
 
-SCM scm_get_platform_info(SCM scm_platform, SCM scm_param_name) {
+SCM scm_get_cl_platform_info(SCM scm_platform, SCM scm_param_name) {
     cl_platform_id   platform   = scm_to_cl_platform_id_here(scm_platform);
     cl_platform_info param_name = scm_to_uint32(scm_param_name);
     size_t buf_len;
@@ -10,7 +10,7 @@ SCM scm_get_platform_info(SCM scm_platform, SCM scm_param_name) {
     return scm_from_locale_stringn(buffer, buf_len - 1);
 }
 
-SCM scm_get_device_info(SCM scm_device, SCM scm_param_name) {
+SCM scm_get_cl_device_info(SCM scm_device, SCM scm_param_name) {
     cl_device_id   device     = scm_to_cl_device_id_here(scm_device);
     cl_device_info param_name = scm_to_uint32(scm_param_name);
     size_t buf_len;
@@ -83,7 +83,7 @@ SCM scm_get_device_info(SCM scm_device, SCM scm_param_name) {
     }
     case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
         SCM dim_key   = scm_from_uint32(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS);
-        SCM dim       = scm_get_device_info(scm_device, dim_key);
+        SCM dim       = scm_get_cl_device_info(scm_device, dim_key);
         cl_uint imax  = scm_to_uint(dim);
         SCM ret       = SCM_EOL;
         size_t *sizes = (size_t*)buffer;
@@ -162,7 +162,7 @@ SCM scm_get_device_info(SCM scm_device, SCM scm_param_name) {
     }
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
-SCM scm_get_context_info(SCM scm_context, SCM scm_param_name) {
+SCM scm_get_cl_context_info(SCM scm_context, SCM scm_param_name) {
     cl_context      context    = scm_to_cl_context_here(scm_context);
     cl_context_info param_name = scm_to_uint32(scm_param_name);
 
@@ -179,7 +179,7 @@ SCM scm_get_context_info(SCM scm_context, SCM scm_param_name) {
         SCM ret = SCM_EOL;
         cl_device_id *devices = (cl_device_id*)buffer;
         SCM num_devices_key = scm_from_uint32(CL_CONTEXT_NUM_DEVICES);
-        SCM scm_num_devices = scm_get_context_info(scm_context, num_devices_key);
+        SCM scm_num_devices = scm_get_cl_context_info(scm_context, num_devices_key);
         cl_uint num_devices = scm_to_uint32(scm_num_devices);
         for(cl_uint ui = 0; ui < num_devices; ++ui) {
             SCM smob = scm_new_smob(guile_opencl_tag, (scm_t_bits)devices[ui]);
@@ -192,7 +192,7 @@ SCM scm_get_context_info(SCM scm_context, SCM scm_param_name) {
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM scm_get_command_queue_info(SCM scm_command_queue, SCM scm_param_name) {
+SCM scm_get_cl_command_queue_info(SCM scm_command_queue, SCM scm_param_name) {
     cl_command_queue      queue      = scm_to_cl_command_queue_here(scm_command_queue);
     cl_command_queue_info param_name = scm_to_uint32(scm_param_name);
 
@@ -216,51 +216,64 @@ SCM scm_get_command_queue_info(SCM scm_command_queue, SCM scm_param_name) {
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM scm_get_mem_info(SCM scm_memobj, SCM scm_param_name) {
+SCM scm_get_cl_mem_info(SCM scm_memobj, SCM scm_param_name) {
     cl_mem      memobj     = scm_to_cl_mem_here(scm_memobj);
     cl_mem_info param_name = scm_to_uint32(scm_param_name);
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_program_info(SCM scm_program, SCM scm_param_name) {
+SCM scm_get_cl_program_info(SCM scm_program, SCM scm_param_name) {
     cl_program      program    = scm_to_cl_program_here(scm_program);
     cl_program_info param_name = scm_to_uint32(scm_param_name);
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_kernel_info(SCM scm_kernel,
+SCM scm_get_cl_kernel_info(SCM scm_kernel,
                         SCM scm_param_name) {
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_sampler_info(SCM scm_sampler, SCM scm_param_name) {
+SCM scm_get_cl_sampler_info(SCM scm_sampler, SCM scm_param_name) {
     cl_sampler      sampler    = scm_to_cl_sampler_here(scm_sampler);
     cl_sampler_info param_name = scm_to_uint32(scm_param_name);
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_program_build_info(SCM scm_program,
-                               SCM scm_device,
-                               SCM scm_param_name) {
+SCM scm_get_cl_program_build_info(SCM scm_program,
+                                  SCM scm_device,
+                                  SCM scm_param_name) {
     cl_program      program    = scm_to_cl_program_here(scm_program);
-    cl_device_id       device     = scm_to_cl_device_id_here(scm_device);
+    cl_device_id    device     = scm_to_cl_device_id_here(scm_device);
     cl_sampler_info param_name = scm_to_uint32(scm_param_name);
+
+    size_t buf_len;
+    CL_CHECK( clGetProgramBuildInfo(program, device, param_name, 0, NULL, &buf_len) );
+    char buffer[buf_len];
+    CL_CHECK( clGetProgramBuildInfo(program, device, param_name, buf_len, buffer, NULL) );
+    switch (param_name) {
+    case CL_PROGRAM_BUILD_STATUS: {
+        // TODO
+    }
+    case CL_PROGRAM_BUILD_LOG: {
+        return scm_from_utf8_stringn(buffer, buf_len);
+    }
+    }
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_work_group_info(SCM scm_kernel,
+SCM scm_get_cl_work_group_info(SCM scm_kernel,
                             SCM scm_device,
                             SCM scm_param_name) {
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_event_profiling_info(SCM scm_event,
+SCM scm_get_cl_event_profiling_info(SCM scm_event,
                                  SCM scm_param_name) {
     // TODO
     return SCM_EOL;
@@ -269,7 +282,7 @@ SCM scm_get_event_profiling_info(SCM scm_event,
 
 
 /* Given any OpenCL Smob, returns an alist of object attributes. */
-SCM scm_get_info(SCM smob, SCM param_name) {
+SCM scm_get_cl_info(SCM smob, SCM param_name) {
     scm_assert_smob_type(guile_opencl_tag, smob);
     scm_t_bits tag = SCM_SMOB_FLAGS(smob);
     SCM ret = SCM_EOL;
@@ -280,7 +293,7 @@ SCM scm_get_info(SCM smob, SCM param_name) {
 #define ACONS_PLATFORM_INFO(platform, param_name, list)                 \
         key = scm_from_locale_string( #param_name );                    \
         val = scm_from_uint32( param_name );                            \
-        ret = scm_acons(key, scm_get_platform_info(smob, val), list);
+        ret = scm_acons(key, scm_get_cl_platform_info(smob, val), list);
 
         ACONS_PLATFORM_INFO(platform, CL_PLATFORM_EXTENSIONS, ret);
         ACONS_PLATFORM_INFO(platform, CL_PLATFORM_VENDOR, ret);
@@ -294,7 +307,7 @@ SCM scm_get_info(SCM smob, SCM param_name) {
 #define ACONS_DEVICE_INFO(device, param_name, list)                     \
         key = scm_from_locale_string( #param_name );                    \
         val = scm_from_uint32( param_name );                            \
-        ret = scm_acons(key, scm_get_device_info(smob, val), list);
+        ret = scm_acons(key, scm_get_cl_device_info(smob, val), list);
 
         ACONS_DEVICE_INFO(device, CL_DRIVER_VERSION, ret);
         ACONS_DEVICE_INFO(device, CL_DEVICE_VERSION, ret);

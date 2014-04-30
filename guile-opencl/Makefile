@@ -1,10 +1,10 @@
 SOURCES :=  $(shell echo *.c)
 OBJS    := $(SOURCES:.c=.o)
 HEADERS := guile_opencl.h
-CFLAGS  := -O2 -std=c99 \
+CFLAGS  := -O2 -std=c99 -Wall -Wno-strict-aliasing \
            `pkg-config --cflags guile-2.0` \
            -I/usr/lib64/OpenCL/global/include
-LDFLAGS := -O2 -std=c99 \
+LDFLAGS := -O2 -std=c99 -Wall \
            `pkg-config --libs guile-2.0` \
            -lOpenCL
 CC      := gcc

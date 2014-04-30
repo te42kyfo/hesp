@@ -10,15 +10,15 @@ type_p(SCM smob, scm_t_bits target_tag) {
     else return SCM_BOOL_F;
 }
 
-SCM      scm_platform_p (SCM smob) { return type_p(smob, cl_platform_tag); }
-SCM        scm_device_p (SCM smob) { return type_p(smob, cl_device_tag); }
-SCM       scm_context_p (SCM smob) { return type_p(smob, cl_context_tag); }
-SCM scm_command_queue_p (SCM smob) { return type_p(smob, cl_command_queue_tag); }
-SCM           scm_mem_p (SCM smob) { return type_p(smob, cl_mem_tag); }
-SCM       scm_program_p (SCM smob) { return type_p(smob, cl_program_tag); }
-SCM        scm_kernel_p (SCM smob) { return type_p(smob, cl_kernel_tag); }
-SCM         scm_event_p (SCM smob) { return type_p(smob, cl_event_tag); }
-SCM       scm_sampler_p (SCM smob) { return type_p(smob, cl_sampler_tag); }
+SCM      scm_cl_platform_p (SCM smob) { return type_p(smob, cl_platform_tag); }
+SCM        scm_cl_device_p (SCM smob) { return type_p(smob, cl_device_tag); }
+SCM       scm_cl_context_p (SCM smob) { return type_p(smob, cl_context_tag); }
+SCM scm_cl_command_queue_p (SCM smob) { return type_p(smob, cl_command_queue_tag); }
+SCM           scm_cl_mem_p (SCM smob) { return type_p(smob, cl_mem_tag); }
+SCM       scm_cl_program_p (SCM smob) { return type_p(smob, cl_program_tag); }
+SCM        scm_cl_kernel_p (SCM smob) { return type_p(smob, cl_kernel_tag); }
+SCM         scm_cl_event_p (SCM smob) { return type_p(smob, cl_event_tag); }
+SCM       scm_cl_sampler_p (SCM smob) { return type_p(smob, cl_sampler_tag); }
 
 
 /* ==== C to SCM conversion routines ==== */
@@ -59,47 +59,47 @@ SCM scm_from_cl_sampler       (cl_sampler       handle) {
 /* ==== SCM to C conversion routines ==== */
 
 cl_platform_id scm_to_cl_platform_id (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_platform_p(obj)))
+    if(!scm_to_bool(scm_cl_platform_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-platform");
     return (cl_platform_id)SCM_SMOB_DATA(obj);
 }
 cl_device_id scm_to_cl_device_id (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_device_p(obj)))
+    if(!scm_to_bool(scm_cl_device_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-device");
     return (cl_device_id)SCM_SMOB_DATA(obj);
 }
 cl_context scm_to_cl_context (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_context_p(obj)))
+    if(!scm_to_bool(scm_cl_context_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-context");
     return (cl_context)SCM_SMOB_DATA(obj);
 }
 cl_command_queue scm_to_cl_command_queue (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_command_queue_p(obj)))
+    if(!scm_to_bool(scm_cl_command_queue_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-command-queue");
     return (cl_command_queue)SCM_SMOB_DATA(obj);
 }
 cl_mem scm_to_cl_mem (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_mem_p(obj)))
+    if(!scm_to_bool(scm_cl_mem_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-mem");
     return (cl_mem)SCM_SMOB_DATA(obj);
 }
 cl_program scm_to_cl_program (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_program_p(obj)))
+    if(!scm_to_bool(scm_cl_program_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-program");
     return (cl_program)SCM_SMOB_DATA(obj);
 }
 cl_kernel scm_to_cl_kernel (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_kernel_p(obj)))
+    if(!scm_to_bool(scm_cl_kernel_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-kernel");
     return (cl_kernel)SCM_SMOB_DATA(obj);
 }
 cl_event scm_to_cl_event (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_event_p(obj)))
+    if(!scm_to_bool(scm_cl_event_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-event");
     return (cl_event)SCM_SMOB_DATA(obj);
 }
 cl_sampler scm_to_cl_sampler (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_sampler_p(obj)))
+    if(!scm_to_bool(scm_cl_sampler_p(obj)))
         scm_wrong_type_arg_msg(__func__, 1, obj, "cl-sampler");
     return (cl_sampler)SCM_SMOB_DATA(obj);
 }
@@ -111,7 +111,7 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
         cl_platform_id platform = (cl_platform_id) SCM_SMOB_DATA(smob);
         SCM key = scm_from_uint32(CL_PLATFORM_NAME);
         scm_puts("#<", port);
-        scm_display(scm_get_platform_info(smob, key), port);
+        scm_display(scm_get_cl_platform_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }
@@ -119,7 +119,7 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
         cl_device_id device = (cl_device_id) SCM_SMOB_DATA(smob);
         SCM key = scm_from_uint32(CL_DEVICE_NAME);
         scm_puts("#<", port);
-        scm_display(scm_get_device_info(smob, key), port);
+        scm_display(scm_get_cl_device_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }

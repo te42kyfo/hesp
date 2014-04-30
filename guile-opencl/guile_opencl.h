@@ -25,15 +25,15 @@ void init_guile_opencl();
 
 /* Return SCM_BOOL_T if the argument is of the specified type and SCM_BOOL_F
    otherwise. */
-SCM scm_platform_p      (SCM smob);
-SCM scm_device_p        (SCM smob);
-SCM scm_context_p       (SCM smob);
-SCM scm_command_queue_p (SCM smob);
-SCM scm_mem_p           (SCM smob);
-SCM scm_program_p       (SCM smob);
-SCM scm_kernel_p        (SCM smob);
-SCM scm_event_p         (SCM smob);
-SCM scm_sampler_p       (SCM smob);
+SCM scm_cl_platform_p      (SCM smob);
+SCM scm_cl_device_p        (SCM smob);
+SCM scm_cl_context_p       (SCM smob);
+SCM scm_cl_command_queue_p (SCM smob);
+SCM scm_cl_mem_p           (SCM smob);
+SCM scm_cl_program_p       (SCM smob);
+SCM scm_cl_kernel_p        (SCM smob);
+SCM scm_cl_event_p         (SCM smob);
+SCM scm_cl_sampler_p       (SCM smob);
 
 /* These commands wrap a given OpenCL handle in a Guile Smob. They do
    always succeed. */
@@ -85,26 +85,26 @@ void cl_callback(const char *errinfo,
 /* Query information from the OpenCL object. The param name must be a Guile
    string matching the name in the OpenCL specification,
    e.g. "CL_PLATFORM_VENDOR". */
-SCM scm_get_platform_info          (SCM platform, SCM param_name);
-SCM scm_get_device_info            (SCM device,   SCM param_name);
-SCM scm_get_context_info           (SCM context,  SCM param_name);
-SCM scm_get_command_queue_info     (SCM queue,    SCM param_name);
-SCM scm_get_mem_info               (SCM memobj,   SCM param_name);
-SCM scm_get_program_info           (SCM program,  SCM param_name);
-SCM scm_get_kernel_info            (SCM kernel,   SCM param_name);
-SCM scm_get_sampler_info           (SCM sampler,  SCM param_name);
-SCM scm_get_program_build_info     (SCM program,  SCM device, SCM param_name);
-SCM scm_get_work_group_info        (SCM kernel,   SCM device, SCM param_name);
-SCM scm_get_event_profiling_info   (SCM event,    SCM param_name);
+SCM scm_get_cl_platform_info          (SCM platform, SCM param_name);
+SCM scm_get_cl_device_info            (SCM device,   SCM param_name);
+SCM scm_get_cl_context_info           (SCM context,  SCM param_name);
+SCM scm_get_cl_command_queue_info     (SCM queue,    SCM param_name);
+SCM scm_get_cl_mem_info               (SCM memobj,   SCM param_name);
+SCM scm_get_cl_program_info           (SCM program,  SCM param_name);
+SCM scm_get_cl_kernel_info            (SCM kernel,   SCM param_name);
+SCM scm_get_cl_sampler_info           (SCM sampler,  SCM param_name);
+SCM scm_get_cl_program_build_info     (SCM program,  SCM device, SCM param_name);
+SCM scm_get_cl_work_group_info        (SCM kernel,   SCM device, SCM param_name);
+SCM scm_get_cl_event_profiling_info   (SCM event,    SCM param_name);
 
-/* Dispatch to specific scm_get_OBJECT_info command depending on type. If
+/* Dispatch to specific scm_get_cl_OBJECT_info command depending on type. If
    param name is omitted, return an alist of all avilable information. */
-SCM scm_get_info (SCM any,      SCM param_name);
+SCM scm_get_cl_info (SCM any,      SCM param_name);
 
 /* The OpenCL API calls. They are very similar to the C++ bindings, except
    that they exploit some Scheme convenience features */
-SCM scm_get_platforms ();
-SCM scm_get_devices (SCM platform);
+SCM scm_get_cl_platforms ();
+SCM scm_get_cl_devices (SCM platform);
 // TODO make_subdevice
 SCM scm_make_context (SCM devices); // TODO cl_context_properties
 // TODO make_context_from_type
@@ -113,9 +113,10 @@ SCM scm_make_buffer (SCM context, SCM flags, SCM size, SCM host_ptr);
 // TODO create sub-buffer
 SCM scm_make_sampler (SCM context, SCM normalized_coords,
                       SCM addressing_mode, SCM filter_mode);
-SCM scm_make_program (SCM context, SCM device, SCM sourcecode);
+SCM scm_make_cl_program (SCM context, SCM device, SCM sourcecode);
+SCM scm_build_cl_program (SCM context, SCM device, SCM sourcecode);
 // TODO binary programs
-SCM scm_make_kernel (SCM program, SCM name);
+SCM scm_make_cl_kernel (SCM program, SCM name);
 SCM scm_read_buffer(SCM command_queue, SCM buffer,
                     SCM blocking_read, // TODO drop blocking mode
                     SCM offset, SCM size, SCM ptr,
@@ -129,10 +130,10 @@ SCM scm_map_buffer (SCM command_queue, SCM buffer,
                     SCM flags,
                     SCM offset, SCM size,
                     SCM event_wait_list); // -> event
-SCM scm_copy_buffer (SCM command_queue,
-                     SCM src_buffer, SCM dst_buffer,
-                     SCM src_offset, SCM dst_offset, SCM size,
-                     SCM event_wait_list); // -> event
+SCM scm_copy_cl_buffer (SCM command_queue,
+                        SCM src_buffer, SCM dst_buffer,
+                        SCM src_offset, SCM dst_offset, SCM size,
+                        SCM event_wait_list); // -> event
 SCM scm_fill_buffer(SCM command_queue, SCM buffer,
                     SCM pattern, // bytevector
                     SCM offset, SCM size,

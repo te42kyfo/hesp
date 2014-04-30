@@ -6,31 +6,31 @@ void init_guile_opencl() {
     guile_opencl_tag = scm_make_smob_type("OpenCL", sizeof(void *));
     scm_set_smob_print(guile_opencl_tag, print_guile_opencl);
 
-    scm_c_define_gsubr("cl-platform?",      1, 0, 0, scm_platform_p);
-    scm_c_define_gsubr("cl-device?",        1, 0, 0, scm_device_p);
-    scm_c_define_gsubr("cl-context?",       1, 0, 0, scm_context_p);
-    scm_c_define_gsubr("cl-command-queue?", 1, 0, 0, scm_command_queue_p);
-    scm_c_define_gsubr("cl-mem?",           1, 0, 0, scm_mem_p);
-    scm_c_define_gsubr("cl-program?",       1, 0, 0, scm_program_p);
-    scm_c_define_gsubr("cl-kernel?",        1, 0, 0, scm_kernel_p);
-    scm_c_define_gsubr("cl-event?",         1, 0, 0, scm_event_p);
-    scm_c_define_gsubr("cl-sampler?",       1, 0, 0, scm_sampler_p);
+    scm_c_define_gsubr("cl-platform?",      1, 0, 0, scm_cl_platform_p);
+    scm_c_define_gsubr("cl-device?",        1, 0, 0, scm_cl_device_p);
+    scm_c_define_gsubr("cl-context?",       1, 0, 0, scm_cl_context_p);
+    scm_c_define_gsubr("cl-command-queue?", 1, 0, 0, scm_cl_command_queue_p);
+    scm_c_define_gsubr("cl-mem?",           1, 0, 0, scm_cl_mem_p);
+    scm_c_define_gsubr("cl-program?",       1, 0, 0, scm_cl_program_p);
+    scm_c_define_gsubr("cl-kernel?",        1, 0, 0, scm_cl_kernel_p);
+    scm_c_define_gsubr("cl-event?",         1, 0, 0, scm_cl_event_p);
+    scm_c_define_gsubr("cl-sampler?",       1, 0, 0, scm_cl_sampler_p);
 
-    scm_c_define_gsubr("cl-platform-info",        2, 0, 0, scm_get_platform_info);
-    scm_c_define_gsubr("cl-device-info",          2, 0, 0, scm_get_device_info);
-    scm_c_define_gsubr("cl-context-info",         2, 0, 0, scm_get_context_info);
-    scm_c_define_gsubr("cl-command-info",         2, 0, 0, scm_get_command_queue_info);
-    scm_c_define_gsubr("cl-mem-info",             2, 0, 0, scm_get_mem_info);
-    scm_c_define_gsubr("cl-program-info",         2, 0, 0, scm_get_program_info);
-    scm_c_define_gsubr("cl-kernel-info",          2, 0, 0, scm_get_kernel_info);
-    scm_c_define_gsubr("cl-sampler-info",         2, 0, 0, scm_get_sampler_info);
-    scm_c_define_gsubr("cl-program-build-info",   3, 0, 0, scm_get_sampler_info);
-    scm_c_define_gsubr("cl-work-group-info",      3, 0, 0, scm_get_sampler_info);
-    scm_c_define_gsubr("cl-event-profiling-info", 2, 0, 0, scm_get_sampler_info);
-    scm_c_define_gsubr("cl-info",                 1, 1, 0, scm_get_info);
+    scm_c_define_gsubr("cl-platform-info",        2, 0, 0, scm_get_cl_platform_info);
+    scm_c_define_gsubr("cl-device-info",          2, 0, 0, scm_get_cl_device_info);
+    scm_c_define_gsubr("cl-context-info",         2, 0, 0, scm_get_cl_context_info);
+    scm_c_define_gsubr("cl-command-info",         2, 0, 0, scm_get_cl_command_queue_info);
+    scm_c_define_gsubr("cl-mem-info",             2, 0, 0, scm_get_cl_mem_info);
+    scm_c_define_gsubr("cl-program-info",         2, 0, 0, scm_get_cl_program_info);
+    scm_c_define_gsubr("cl-kernel-info",          2, 0, 0, scm_get_cl_kernel_info);
+    scm_c_define_gsubr("cl-sampler-info",         2, 0, 0, scm_get_cl_sampler_info);
+    scm_c_define_gsubr("cl-program-build-info",   3, 0, 0, scm_get_cl_program_build_info);
+    //    scm_c_define_gsubr("cl-work-group-info",      3, 0, 0, );
+    //    scm_c_define_gsubr("cl-event-profiling-info", 2, 0, 0, );
+    scm_c_define_gsubr("cl-info",                 1, 1, 0, scm_get_cl_info);
 
-    scm_c_define_gsubr("cl-get-platforms",  0, 0, 0, scm_get_platforms);
-    scm_c_define_gsubr("cl-get-devices",    1, 0, 0, scm_get_devices);
+    scm_c_define_gsubr("cl-get-platforms",  0, 0, 0, scm_get_cl_platforms);
+    scm_c_define_gsubr("cl-get-devices",    1, 0, 0, scm_get_cl_devices);
     scm_c_define_gsubr("cl-make-context",   0, 0, 1, scm_make_context);
     scm_c_define_gsubr("cl-make-queue",     2, 1, 0, scm_make_queue);
     scm_c_define_gsubr("cl-make-buffer",    4, 0, 0, scm_make_buffer);
@@ -38,7 +38,11 @@ void init_guile_opencl() {
     scm_c_define_gsubr("cl-write-buffer",   7, 0, 0, scm_write_buffer);
     scm_c_define_gsubr("cl-map-buffer",     7, 0, 0, scm_map_buffer);
     scm_c_define_gsubr("cl-unmap-mem",      4, 0, 0, scm_unmap_mem);
-    scm_c_define_gsubr("cl-copy-buffer",    7, 0, 0, scm_copy_buffer);
+    scm_c_define_gsubr("cl-copy-buffer",    7, 0, 0, scm_copy_cl_buffer);
+
+    scm_c_define_gsubr("cl-make-program",   3, 0, 0, scm_make_cl_program);
+    scm_c_define_gsubr("cl-build-program",  3, 0, 0, scm_build_cl_program);
+    scm_c_define_gsubr("cl-make-kernel",    2, 0, 0, scm_make_cl_kernel);
 
     /* export of OpenCL constants */
 #define DEFINE_CONSTANT(NAME) scm_c_define(#NAME, scm_from_uint32(NAME))

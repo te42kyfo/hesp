@@ -31,15 +31,15 @@
                             (format #t "~:@(~a~) #~d:~%" name id)
                             (hesp-print item) (newline))
                           list (iota len))
-                (format #t "Choose a ~a (from 0 to ~d" name (1- len))
-                (list-ref platforms (string->number (read-line)))))))
+                (format #t "Choose a ~a (from 0 to ~d)~%" name (1- len))
+                (list-ref list (string->number (read-line)))))))
     (format #t "Using the following ~a:~%" name)
     (hesp-print selection)
     (newline)
     selection))
 
 (define (main args)
-  ; Step 1 platform setup
+  ; platform setup
   (let* ((platform  (hesp-select (cl-get-platforms) "platform"))
          (device    (hesp-select (cl-get-devices platform) "device"))
          (context   (cl-make-context device))
@@ -66,4 +66,23 @@
         (bytevector-copy! bv 0 stars 0 bye-len)
         (format #t "~a ~%" (bytevector->string stars "US-ASCII"))
         (cl-unmap-mem queue bye-buf (bytevector->pointer bv) #f)))
-    (format #t "TODO Kernels~%")))
+    ; now a simple kernel
+    (let* ((a     (make-f32vector 13 1.0))
+           (a-len (bytevector-length a))
+           (a-ptr (bytevector->pointer a))
+           (a-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR a-len a-ptr))
+           (b     (make-f32vector 13 1.0))
+           (b-len (bytevector-length b))
+           (b-ptr (bytevector->pointer b))
+           (b-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR b-len b-ptr))
+           (sourcecode "
+kernel void add(global float∗ a, global float ∗b, global float∗ c, unsigned int n) {
+    const size_t i = get_global_id(0);
+    c[i] = a[i] + b[i];
+} ")
+           (program (cl-build-program (cl-make-program context device sourcecode) (list device) ""))
+           (kernel  (cl-make-kernel program "add"))
+           )
+      (cl-write-buffer queue a-buf #t 0 a-len a-ptr #f)
+      (cl-write-buffer queue b-buf #t 0 b-len b-ptr #f)
+      (format #t "TODO apply kernel~%"))))

@@ -2,7 +2,7 @@
 #include "guile_opencl.h"
 
 /* return a list of platform Smobs. */
-SCM scm_get_platforms() {
+SCM scm_get_cl_platforms() {
     cl_uint         num_platforms;
     CL_CHECK( clGetPlatformIDs(0, NULL, &num_platforms) );
     if(0 == num_platforms) return SCM_EOL;
@@ -20,7 +20,7 @@ SCM scm_get_platforms() {
 }
 
 /* Return a list of device Smobs */
-SCM scm_get_devices(SCM smob) {
+SCM scm_get_cl_devices(SCM smob) {
     scm_assert_smob_type(guile_opencl_tag, smob);
     scm_t_bits tag = SCM_SMOB_FLAGS(smob);
     if(tag != cl_platform_tag) {
@@ -60,16 +60,16 @@ SCM scm_make_context(SCM device_list) {
 
     SCM rest = device_list;
     for(size_t i = 0; i < len; ++i) {
-        SCM e    = SCM_CAR(device_list);
-        SCM rest = SCM_CDR(device_list);
+        SCM e    = SCM_CAR(rest);
+        rest = SCM_CDR(rest);
         devices[i] = scm_to_cl_device_id_here(e);
     }
 
     /* A platform is needed to create a context. I simply take the platform of
        the first device and rely on the OpenCL implementation to detect if
        some devices are from different platforms that the first. */
-    SCM scm_platform = scm_get_device_info(SCM_CAR(device_list),
-                                           scm_from_uint32(CL_DEVICE_PLATFORM));
+    SCM scm_platform = scm_get_cl_device_info(SCM_CAR(device_list),
+                                              scm_from_uint32(CL_DEVICE_PLATFORM));
     cl_platform_id platform = scm_to_cl_platform_id_here(scm_platform);
     cl_context_properties cps[3];
     cps[0] = (cl_context_properties)CL_CONTEXT_PLATFORM;
@@ -176,7 +176,7 @@ SCM scm_map_buffer(SCM scm_command_queue, SCM scm_buffer,
     return scm_values(scm_list_2(bv, scm_event));
 }
 
-SCM scm_copy_buffer(SCM scm_command_queue,
+SCM scm_copy_cl_buffer(SCM scm_command_queue,
                     SCM scm_src_buffer, SCM scm_dst_buffer,
                     SCM scm_src_offset, SCM scm_dst_offset, SCM scm_size,
                     SCM scm_event_wait_list) {
@@ -192,7 +192,7 @@ SCM scm_copy_buffer(SCM scm_command_queue,
     CL_CHECK( clEnqueueCopyBuffer(queue, src, dst,
                                   src_offset, dst_offset, size,
                                   0, NULL, &event) );
-
+    return scm_from_cl_event(event);
 }
 
 SCM scm_unmap_mem(SCM scm_command_queue, SCM scm_mem,
@@ -205,4 +205,42 @@ SCM scm_unmap_mem(SCM scm_command_queue, SCM scm_mem,
     cl_event event;
     CL_CHECK( clEnqueueUnmapMemObject(queue, mem, ptr, 0, NULL, &event) );
     return scm_from_cl_event(event);
+}
+
+SCM scm_make_cl_program(SCM scm_context, SCM scm_device, SCM scm_sourcecode) {
+    cl_context  context = scm_to_cl_context_here(scm_context);
+    size_t      len;
+    char       *sourcecode = scm_to_locale_stringn(scm_sourcecode, &len);
+    cl_int      err;
+    cl_program  program = clCreateProgramWithSource(context, 1,
+                                                    (const char **)&sourcecode, &len, &err);
+    free(sourcecode);
+    CL_CHECK( err );
+    return scm_from_cl_program(program);
+}
+
+SCM scm_build_cl_program(SCM scm_program, SCM scm_devices, SCM scm_options) {
+    cl_program   program     = scm_to_cl_program_here(scm_program);
+    size_t       num_devices = scm_to_size_t(scm_length(scm_devices));
+    cl_device_id devices[num_devices];
+    char        *options     = scm_to_locale_string(scm_options);
+    SCM rest = scm_devices;
+    for(size_t i = 0; i < num_devices; ++i) {
+        SCM e    = SCM_CAR(rest);
+        rest = SCM_CDR(rest);
+        devices[i] = scm_to_cl_device_id_here(e);
+    }
+    CL_CHECK( clBuildProgram(program, num_devices, devices,
+                             options, NULL, NULL) ); // TODO add callback
+    return scm_program;
+}
+
+SCM scm_make_cl_kernel(SCM scm_program, SCM scm_name) {
+    cl_program program = scm_to_cl_program_here(scm_program);
+    char      *name    = scm_to_utf8_string(scm_name);
+    cl_int     err;
+    cl_kernel  kernel  = clCreateKernel(program, name, &err);
+    free(name);
+    CL_CHECK( err );
+    return scm_from_cl_kernel(kernel);
 }
