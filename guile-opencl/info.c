@@ -148,10 +148,7 @@ SCM scm_get_device_info(SCM scm_device, SCM scm_param_name) {
         return scm_from_locale_stringn(buffer, buf_len - 1);
     }
     case CL_DEVICE_PLATFORM: {
-        cl_platform_id platform = *(cl_platform_id*)buffer;
-        SCM smob = scm_new_smob(guile_opencl_tag, (scm_t_bits)platform);
-        SCM_SET_SMOB_FLAGS(smob, cl_platform_tag);
-        return smob;
+        return scm_from_cl_platform_id( *(cl_platform_id*)buffer );
     }
     case CL_DEVICE_IMAGE_SUPPORT:
     case CL_DEVICE_ERROR_CORRECTION_SUPPORT:
@@ -181,9 +178,9 @@ SCM scm_get_context_info(SCM scm_context, SCM scm_param_name) {
     case CL_CONTEXT_DEVICES: {
         SCM ret = SCM_EOL;
         cl_device_id *devices = (cl_device_id*)buffer;
-        SCM num_devices_key = scm_from_locale_string("CL_CONTEXT_NUM_DEVICES");
+        SCM num_devices_key = scm_from_uint32(CL_CONTEXT_NUM_DEVICES);
         SCM scm_num_devices = scm_get_context_info(scm_context, num_devices_key);
-        cl_uint num_devices = scm_to_uint(scm_num_devices);
+        cl_uint num_devices = scm_to_uint32(scm_num_devices);
         for(cl_uint ui = 0; ui < num_devices; ++ui) {
             SCM smob = scm_new_smob(guile_opencl_tag, (scm_t_bits)devices[ui]);
             SCM_SET_SMOB_FLAGS(smob, cl_device_tag);
@@ -198,13 +195,43 @@ SCM scm_get_context_info(SCM scm_context, SCM scm_param_name) {
 SCM scm_get_command_queue_info(SCM scm_command_queue, SCM scm_param_name) {
     cl_command_queue      queue      = scm_to_cl_command_queue_here(scm_command_queue);
     cl_command_queue_info param_name = scm_to_uint32(scm_param_name);
-    // TODO
-    return SCM_EOL;
+
+    size_t buf_len;
+    CL_CHECK( clGetCommandQueueInfo(queue, param_name, 0, NULL, &buf_len) );
+    char buffer[buf_len];
+    CL_CHECK( clGetCommandQueueInfo(queue, param_name, buf_len, buffer, NULL) );
+
+    switch(param_name) {
+    case CL_QUEUE_CONTEXT: {
+        return scm_from_cl_context( *(cl_context*)buffer );
+    }
+    case CL_QUEUE_DEVICE: {
+        return scm_from_cl_device_id( *(cl_device_id*)buffer );
+    }
+    case CL_QUEUE_PROPERTIES: {
+        // TODO
+        return SCM_EOL;
+    }
+    }
+    scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
 SCM scm_get_mem_info(SCM scm_memobj, SCM scm_param_name) {
     cl_mem      memobj     = scm_to_cl_mem_here(scm_memobj);
     cl_mem_info param_name = scm_to_uint32(scm_param_name);
+    // TODO
+    return SCM_EOL;
+}
+
+SCM scm_get_program_info(SCM scm_program, SCM scm_param_name) {
+    cl_program      program    = scm_to_cl_program_here(scm_program);
+    cl_program_info param_name = scm_to_uint32(scm_param_name);
+    // TODO
+    return SCM_EOL;
+}
+
+SCM scm_get_kernel_info(SCM scm_kernel,
+                        SCM scm_param_name) {
     // TODO
     return SCM_EOL;
 }
@@ -216,33 +243,25 @@ SCM scm_get_sampler_info(SCM scm_sampler, SCM scm_param_name) {
     return SCM_EOL;
 }
 
-SCM scm_get_program_info(SCM scm_program, SCM scm_param_name) {
-    // TODO
-    return SCM_EOL;
-}
-
 SCM scm_get_program_build_info(SCM scm_program,
                                SCM scm_device,
                                SCM scm_param_name) {
+    cl_program      program    = scm_to_cl_program_here(scm_program);
+    cl_device_id       device     = scm_to_cl_device_id_here(scm_device);
+    cl_sampler_info param_name = scm_to_uint32(scm_param_name);
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_kernel_info(SCM scm_kernel,
-                        SCM scm_param_name) {
+SCM scm_get_work_group_info(SCM scm_kernel,
+                            SCM scm_device,
+                            SCM scm_param_name) {
     // TODO
     return SCM_EOL;
 }
 
-SCM scm_get_kernel_work_group_info(SCM scm_kernel,
-                                   SCM scm_device,
-                                   SCM scm_param_name) {
-    // TODO
-    return SCM_EOL;
-}
-
-SCM scm_get_event_profiling_info(cl_event event,
-                                  cl_profiling_info param_name) {
+SCM scm_get_event_profiling_info(SCM scm_event,
+                                 SCM scm_param_name) {
     // TODO
     return SCM_EOL;
 }

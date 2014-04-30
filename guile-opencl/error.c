@@ -58,3 +58,14 @@ void cl_check_value(cl_int value, const char* subr) {
         scm_misc_error(subr, "unknown error", SCM_EOL);
     }
 }
+
+void cl_callback(const char *errinfo,
+                 const void *private_info,
+                 size_t cb,
+                 void *user_data) {
+    if(NULL == user_data) {
+        scm_misc_error("cl_callback", errinfo, SCM_EOL);
+    } else {
+        scm_misc_error((char *)user_data, errinfo, SCM_EOL);
+    }
+}

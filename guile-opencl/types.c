@@ -117,7 +117,7 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
     }
     if(tag == cl_device_tag) {
         cl_device_id device = (cl_device_id) SCM_SMOB_DATA(smob);
-        SCM key = scm_from_locale_string("CL_DEVICE_NAME");
+        SCM key = scm_from_uint32(CL_DEVICE_NAME);
         scm_puts("#<", port);
         scm_display(scm_get_device_info(smob, key), port);
         scm_puts(">", port);
@@ -125,37 +125,37 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
     }
     if(tag == cl_context_tag) {
         cl_context context = (cl_context) SCM_SMOB_DATA(smob);
-        scm_puts("#< context >", port); // TODO
+        scm_puts("#<cl-context>", port); // TODO
         return 1;
     }
     if(tag == cl_command_queue_tag) {
         cl_command_queue command_queue = (cl_command_queue) SCM_SMOB_DATA(smob);
-        scm_puts("#< command queue >", port); // TODO
+        scm_puts("#<cl-command-queue>", port); // TODO
         return 1;
     }
     if(tag == cl_mem_tag) {
         cl_mem mem = (cl_mem) SCM_SMOB_DATA(smob);
-        scm_puts("#< mem >", port); // TODO
+        scm_puts("#<cl-mem>", port); // TODO
         return 1;
     }
     if(tag == cl_program_tag) {
         cl_program program = (cl_program) SCM_SMOB_DATA(smob);
-        scm_puts("#< program >", port); // TODO
+        scm_puts("#<cl-program>", port); // TODO
         return 1;
     }
     if(tag == cl_kernel_tag) {
         cl_kernel kernel = (cl_kernel) SCM_SMOB_DATA(smob);
-        scm_puts("#< kernel >", port); // TODO
+        scm_puts("#<cl-kernel>", port); // TODO
         return 1;
     }
     if(tag == cl_event_tag) {
         cl_event event = (cl_event) SCM_SMOB_DATA(smob);
-        scm_puts("#< event >", port); // TODO
+        scm_puts("#<cl-event>", port); // TODO
         return 1;
     }
     if(tag == cl_sampler_tag) {
         cl_sampler sampler = (cl_sampler) SCM_SMOB_DATA(smob);
-        scm_puts("#< sampler >", port); // TODO
+        scm_puts("#<cl-sampler>", port); // TODO
         return 1;
     }
     scm_misc_error(__func__, "smob of invalid type", SCM_EOL);

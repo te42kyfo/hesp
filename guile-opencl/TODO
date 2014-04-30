@@ -1,0 +1,3 @@
+- all OpenCL constants except the error codes are assumed to fit into an
+  uint32. I use scm_from_uint32() to convert them.
+- all OpenCL handles must be small enough to fit into the data cell of a SMOB.
