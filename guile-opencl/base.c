@@ -244,3 +244,26 @@ SCM scm_make_cl_kernel(SCM scm_program, SCM scm_name) {
     CL_CHECK( err );
     return scm_from_cl_kernel(kernel);
 }
+
+// TODO remove
+SCM scm_cl_foo(SCM scm_queue, SCM scm_kernel, SCM scm_a, SCM scm_b, SCM scm_c, SCM scm_n) {
+    cl_command_queue queue = scm_to_cl_command_queue_here(scm_queue);
+    cl_kernel kernel = scm_to_cl_kernel_here(scm_kernel);
+    cl_mem a      = scm_to_cl_mem_here(scm_a);
+    cl_mem b      = scm_to_cl_mem_here(scm_b);
+    cl_mem c      = scm_to_cl_mem_here(scm_c);
+    cl_uint n      = scm_to_size_t(scm_n);
+    CL_CHECK( clSetKernelArg(kernel, 0, sizeof(a),      &a) );
+    CL_CHECK( clSetKernelArg(kernel, 1, sizeof(b),      &b) );
+    CL_CHECK( clSetKernelArg(kernel, 2, sizeof(c),      &c) );
+    CL_CHECK( clSetKernelArg(kernel, 3, sizeof(cl_uint), &n) );
+    size_t global_size[1]   = {13};
+    size_t local_size[1]    = {128};
+    cl_event event;
+    // TODO event list
+    CL_CHECK( clEnqueueNDRangeKernel(queue, kernel, 1,
+                                     NULL, global_size, NULL,
+                                     0, NULL, &event) );
+    clFinish(queue);
+    return scm_from_cl_event(event);
+}

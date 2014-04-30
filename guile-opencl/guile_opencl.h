@@ -158,3 +158,4 @@ SCM scm_cl_finish (SCM command_queue);
 
 // TODO images, native kernels, sampler, CL/GL interop
 
+SCM scm_cl_foo(SCM scm_queue, SCM scm_kernel, SCM scm_a, SCM scm_b, SCM scm_c, SCM scm_n);

@@ -44,6 +44,9 @@ void init_guile_opencl() {
     scm_c_define_gsubr("cl-build-program",  3, 0, 0, scm_build_cl_program);
     scm_c_define_gsubr("cl-make-kernel",    2, 0, 0, scm_make_cl_kernel);
 
+    // TODO hesp stub
+    scm_c_define_gsubr("foo", 6, 0, 0, scm_cl_foo);
+
     /* export of OpenCL constants */
 #define DEFINE_CONSTANT(NAME) scm_c_define(#NAME, scm_from_uint32(NAME))
     DEFINE_CONSTANT( CL_VERSION_1_0 );
