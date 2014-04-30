@@ -5,10 +5,13 @@
 (use-modules (ice-9 pretty-print)
              (ice-9 format)
              (ice-9 rdelim)
-             (ice-9 iconv)
+             ;(ice-9 iconv) not installed on huber CIP
+             (ice-9 binary-ports)
              (ice-9 receive)
              (rnrs bytevectors)
              (system foreign))
+
+(load "iconv.scm")
 
 (setenv "LTDL_LIBRARY_PATH" "./guile-opencl/")
 (load-extension "libguile-opencl" "init_guile_opencl")
