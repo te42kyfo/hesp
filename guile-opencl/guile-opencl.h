@@ -92,6 +92,7 @@ SCM scm_get_cl_command_queue_info     (SCM queue,    SCM param_name);
 SCM scm_get_cl_mem_info               (SCM memobj,   SCM param_name);
 SCM scm_get_cl_program_info           (SCM program,  SCM param_name);
 SCM scm_get_cl_kernel_info            (SCM kernel,   SCM param_name);
+SCM scm_get_cl_event_info             (SCM event,    SCM param_name);
 SCM scm_get_cl_sampler_info           (SCM sampler,  SCM param_name);
 SCM scm_get_cl_program_build_info     (SCM program,  SCM device, SCM param_name);
 SCM scm_get_cl_work_group_info        (SCM kernel,   SCM device, SCM param_name);
@@ -159,3 +160,5 @@ SCM scm_cl_finish (SCM command_queue);
 // TODO images, native kernels, sampler, CL/GL interop
 
 SCM scm_cl_foo(SCM scm_queue, SCM scm_kernel, SCM scm_a, SCM scm_b, SCM scm_c, SCM scm_n);
+
+void scm_init_guile_opencl();

@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include "guile_opencl.h"
+#include "guile-opencl.h"
 
 /* return a list of platform Smobs. */
 SCM scm_get_cl_platforms() {
@@ -21,14 +21,9 @@ SCM scm_get_cl_platforms() {
 
 /* Return a list of device Smobs */
 SCM scm_get_cl_devices(SCM smob) {
-    scm_assert_smob_type(guile_opencl_tag, smob);
-    scm_t_bits tag = SCM_SMOB_FLAGS(smob);
-    if(tag != cl_platform_tag) {
-        scm_wrong_type_arg_msg(__func__, 1, smob, "cl_platform");
-    }
-    // TODO allow filtering for cl_device_type
-    cl_platform_id platform = (cl_platform_id)SCM_SMOB_DATA(smob);
+    cl_platform_id platform = scm_to_cl_platform_id_here(smob);
     cl_uint         num_devices;
+    // TODO allow filtering for cl_device_type
     CL_CHECK( clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL,
                         0, NULL, &num_devices) );
     if(0 == num_devices) return SCM_EOL;
@@ -258,11 +253,11 @@ SCM scm_cl_foo(SCM scm_queue, SCM scm_kernel, SCM scm_a, SCM scm_b, SCM scm_c, S
     CL_CHECK( clSetKernelArg(kernel, 2, sizeof(c),      &c) );
     CL_CHECK( clSetKernelArg(kernel, 3, sizeof(cl_uint), &n) );
     size_t global_size[1]   = {13};
-    size_t local_size[1]    = {128};
+    size_t local_size[1]    = {1};
     cl_event event;
     // TODO event list
     CL_CHECK( clEnqueueNDRangeKernel(queue, kernel, 1,
-                                     NULL, global_size, NULL,
+                                     NULL, global_size, local_size,
                                      0, NULL, &event) );
     clFinish(queue);
     return scm_from_cl_event(event);

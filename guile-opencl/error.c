@@ -1,4 +1,4 @@
-#include "guile_opencl.h"
+#include "guile-opencl.h"
 
 void cl_check_value(cl_int value, const char* subr) {
     switch(value) {
