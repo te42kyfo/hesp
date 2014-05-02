@@ -1,17 +1,18 @@
 .PHONY: guile-opencl clean hesp
 CC      := gcc
 FLAGS   := -O2 -std=c99 -Wall
-CFLAGS  := ${FLAGS} `pkg-config --cflags guile-2.0`
-LDFLAGS := ${FLAGS} `pkg-config --libs guile-2.0`
+INCS    := -I/usr/lib64/OpenCL/global/include
+CFLAGS  := ${FLAGS} `pkg-config --cflags guile-2.0` ${INCS}
+LDFLAGS := ${FLAGS} `pkg-config --libs guile-2.0` -Lguile-opencl -lguile-opencl
 SRCS    := $(shell echo *.c)
 OBJS    := $(SRCS:.c=.o)
 
-hesp: guile-opencl ${OBJS}
-	${CC} ${LDFLAGS} ${OBJS} -o hesp
+hesp-start: guile-opencl ${OBJS}
+	${CC} ${LDFLAGS} ${OBJS} -o $@
 
 guile-opencl:
 	cd guile-opencl && $(MAKE)
 
 clean:
-	rm -f *.o hesp
+	rm -f *.o hesp-start
 	cd guile-opencl && $(MAKE) clean

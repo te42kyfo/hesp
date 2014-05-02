@@ -7,10 +7,10 @@
     SCM_SET_SMOB_FLAGS(x, tag);                                  \
     return x
 
-SCM scm_from_cl_platform_id (cl_platform_id     handle) {
+SCM scm_from_cl_platform_id   (cl_platform_id     handle) {
     SCM_FROM_CL_BODY(handle, cl_platform_tag);
 }
-SCM scm_from_cl_device        (cl_device_id     handle) {
+SCM scm_from_cl_device_id     (cl_device_id     handle) {
     SCM_FROM_CL_BODY(handle, cl_device_tag);
 }
 SCM scm_from_cl_context       (cl_context       handle) {

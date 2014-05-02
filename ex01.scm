@@ -7,9 +7,6 @@
              (rnrs bytevectors)
              (system foreign))
 
-(setenv "LTDL_LIBRARY_PATH" "./guile-opencl/")
-(load-extension "libguile-opencl" "init_guile_opencl")
-
 ; output with exactly the formatting of the reference output
 (define (hesp-print obj)
   (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))
