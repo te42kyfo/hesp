@@ -17,7 +17,7 @@ SNARF_INCS := $(SNARF_SRCS:.c=.x)
 libguile-opencl.so: | $(SNARF_INCS) $(OBJS)
 	$(CC) $(LDFLAGS) -shared -fPIC -o $@ $(OBJS)
 
-%.o : %.c
+%.o : %.c %.h
 	$(CC) $(CFLAGS) $(INCS) -shared -fPIC -c $< -o $@
 
 %.x : %.c

@@ -1,4 +1,4 @@
-#include "guile-opencl.h"
+#include "scm_cl_constants.h"
 
 #define DEFINE_CONSTANT(NAME)                                           \
     SCM_GLOBAL_VARIABLE_INIT(SCM_##NAME, #NAME, scm_from_uint32(NAME))

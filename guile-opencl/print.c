@@ -1,0 +1,53 @@
+#include "guile-opencl.h"
+
+int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
+    scm_t_bits tag = SCM_SMOB_FLAGS(smob);
+
+    if(tag == cl_platform_tag) {
+        SCM key = scm_from_uint32(CL_PLATFORM_NAME);
+        scm_puts("#<cl-platform: ", port);
+        scm_display(scm_get_cl_platform_info(smob, key), port);
+        scm_puts(">", port);
+        return 1;
+    }
+    if(tag == cl_device_tag) {
+        SCM key = scm_from_uint32(CL_DEVICE_NAME);
+        scm_puts("#<cl-device: ", port);
+        scm_display(scm_get_cl_device_info(smob, key), port);
+        scm_puts(">", port);
+        return 1;
+    }
+    if(tag == cl_context_tag) {
+        SCM key = scm_from_uint32(CL_CONTEXT_DEVICES);
+        scm_puts("#<cl-context: ", port);
+        scm_display(scm_get_cl_context_info(smob, key), port);
+        scm_puts(">", port);
+        return 1;
+    }
+    if(tag == cl_command_queue_tag) {
+        scm_puts("#<cl-command-queue: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_mem_tag) {
+        scm_puts("#<cl-mem: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_program_tag) {
+        scm_puts("#<cl-program: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_kernel_tag) {
+        scm_puts("#<cl-kernel: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_event_tag) {
+        scm_puts("#<cl-event: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_sampler_tag) {
+        scm_puts("#<cl-sampler: >", port); // TODO
+        return 1;
+    }
+    scm_misc_error(__func__, "smob of invalid type", SCM_EOL);
+    return 1;
+}
