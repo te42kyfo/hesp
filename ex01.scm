@@ -50,43 +50,15 @@
            (qmarks (make-bytevector 15 (char->integer #\?)))
            (stars (make-bytevector 15 (char->integer #\*))))
 
-      (cl-write-buffer queue hello-buf #t 0 hello-len hello-ptr #f)
-      (cl-read-buffer queue hello-buf #t 0 hello-len (bytevector->pointer qmarks) #f)
+      (cl-write-buffer queue hello-buf 0 hello #f)
+      (cl-finish queue)
+      (cl-read-buffer  queue hello-buf 0
+                       (cl-alias-bytevector qmarks hello-len 0) #f)
       (format #t "~a~%" (bytevector->string qmarks "US-ASCII"))
 
       (cl-copy-buffer queue hello-buf bye-buf 0 0 (min hello-len bye-len) #f)
       (receive (bv event)
-          (cl-map-buffer queue bye-buf #t CL_MAP_READ 0 bye-len #f)
+          (cl-map-buffer queue bye-buf CL_MAP_READ 0 bye-len #f)
         (bytevector-copy! bv 0 stars 0 bye-len)
         (format #t "~a~%" (bytevector->string stars "US-ASCII"))
-        (cl-unmap-mem queue bye-buf (bytevector->pointer bv) #f)))
-    ; now a simple kernel
-    (let* ((a (make-f32vector 13 1.0))
-           (a-len (bytevector-length a))
-           (a-ptr (bytevector->pointer a))
-           (a-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR a-len a-ptr))
-           (b (make-f32vector 13 1.0))
-           (b-len (bytevector-length b))
-           (b-ptr (bytevector->pointer b))
-           (b-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR b-len b-ptr))
-           (c (make-f32vector 13 0.0))
-           (c-len (bytevector-length c))
-           (c-ptr (bytevector->pointer c))
-           (c-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR c-len c-ptr))
-           (sourcecode "
-kernel void add(global float∗ a, global float ∗b, global float∗ c, unsigned int n) {
-const size_t i = get_global_id(0);
-if(i < n) c[i] = a[i] + b[i];
-}
-")
-           (program (cl-build-program
-                     (cl-make-program context device sourcecode)
-                     (list device)
-                     ""))
-           (kernel (cl-make-kernel program "add")))
-      (cl-write-buffer queue a-buf #t 0 a-len a-ptr #f)
-      (cl-write-buffer queue b-buf #t 0 b-len b-ptr #f)
-      ; no time to make the kernel application properly, so have this stub instead
-      (foo queue kernel a-buf b-buf c-buf 13)
-      (cl-read-buffer queue c-buf #t 0 c-len (bytevector->pointer c) #f)
-      (format #t "~{~a~%~}~%" (f32vector->list c)))))
+        (cl-unmap queue bye-buf bv #f)))))

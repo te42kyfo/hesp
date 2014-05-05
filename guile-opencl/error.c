@@ -1,4 +1,6 @@
-#include "guile-opencl.h"
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
+#include <CL/cl.h>
+#include "error.h"
 
 void cl_check_value(cl_int value, const char* subr) {
     switch(value) {
@@ -68,4 +70,10 @@ void cl_callback(const char *errinfo,
     } else {
         scm_misc_error((char *)user_data, errinfo, SCM_EOL);
     }
+}
+
+void guile_opencl_init_error() {
+#ifndef SCM_MAGIC_SNARFER
+#include "error.x"
+#endif
 }

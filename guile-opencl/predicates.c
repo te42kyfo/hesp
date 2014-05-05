@@ -1,6 +1,6 @@
-#include "guile-opencl.h"
-
-/* ==== predicates ====*/
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
+#include "predicates.h"
+#include "constants.h"
 
 /* Return SCM_BOOL_T iff x is a valid smob and the flags match target_tag and
    SCM_BOOL_F otherwise. */
@@ -75,8 +75,8 @@ SCM_DEFINE (scm_cl_sampler_p, "cl-sampler?", 1, 0, 0,
     return type_p(x, cl_sampler_tag);
 }
 
-void scm_init_cl_predicates () {
+void guile_opencl_init_predicates () {
 #ifndef SCM_MAGIC_SNARFER
-#include "scm_cl_predicates.x"
+#include "predicates.x"
 #endif
 }

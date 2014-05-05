@@ -1,5 +1,22 @@
-- all OpenCL constants except the error codes are assumed to fit into an
-  uint32. I use scm_from_uint32() to convert them.
-- all OpenCL handles must be small enough to fit into the data cell of a SMOB.
-- specially taylored callbacks
-- proper dependency tracking for the headers
+An incomplete list of open issues one might address somedays
+
+- all OpenCL constants except the error codes are assumed to be cl_uint.  This
+  is not true for cl_bitfield and cl_build_status. I should change this.
+
+- all OpenCL handles must be small enough to fit into the data cell of a
+  SMOB. CL/cl.h declares them as pointers, so everyting should be fine. Maybe
+  a compile time check would be appropriate.
+
+- install specially taylored callbacks by default
+
+- substitute all methods that work on pointers, lengths and offsets with Guile
+  bytevectors. Bytevectors can alias and have their length tracked and are
+  therefore no downgrade.
+
+- Instead of copy rectangle, provide a cl-copy-array function that takes any
+  array, shared array, vector or bytevector and moves it from/to a device.
+
+- guile-opencl should be a Guile module, not just global declarations
+
+- Image support is completely missing. This includes kernel arguments,
+  samplers and all routines working on images.

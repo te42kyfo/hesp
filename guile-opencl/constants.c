@@ -1,7 +1,10 @@
-#include "scm_cl_constants.h"
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
+#include "constants.h"
+#include "conversion.h"
+#include <CL/cl.h>
 
 #define DEFINE_CONSTANT(NAME)                                           \
-    SCM_GLOBAL_VARIABLE_INIT(SCM_##NAME, #NAME, scm_from_uint32(NAME))
+    SCM_GLOBAL_VARIABLE_INIT(SCM_##NAME, #NAME, scm_from_cl_uint(NAME))
 
 DEFINE_CONSTANT( CL_VERSION_1_0 );
 DEFINE_CONSTANT( CL_VERSION_1_1 );
@@ -229,8 +232,8 @@ DEFINE_CONSTANT( CL_PROFILING_COMMAND_SUBMIT );
 DEFINE_CONSTANT( CL_PROFILING_COMMAND_START );
 DEFINE_CONSTANT( CL_PROFILING_COMMAND_END );
 
-void scm_init_cl_constants() {
+void guile_opencl_init_constants() {
 #ifndef SCM_MAGIC_SNARFER
-#include "scm_cl_constants.x"
+#include "constants.x"
 #endif
 }

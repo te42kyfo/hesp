@@ -1,5 +1,6 @@
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
-#include "guile-opencl.h"
+#include <libguile.h>
 
 /* There can only be 256 different Smob types in the system. Guile-OpenCL
    requires only a single guile type and implements its own type system with
@@ -240,4 +241,5 @@ SCM SCM_CL_PROFILING_COMMAND_QUEUED;
 SCM SCM_CL_PROFILING_COMMAND_SUBMIT;
 SCM SCM_CL_PROFILING_COMMAND_START;
 SCM SCM_CL_PROFILING_COMMAND_END;
-void scm_init_cl_info();
+
+void guile_opencl_init_constants();

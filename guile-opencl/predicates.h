@@ -1,5 +1,6 @@
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
-#include "guile-opencl.h"
+#include <libguile.h>
 
 /* Return SCM_BOOL_T if the argument is of the specified type and SCM_BOOL_F
    otherwise. */
@@ -12,3 +13,5 @@ SCM scm_cl_program_p       (SCM x);
 SCM scm_cl_kernel_p        (SCM x);
 SCM scm_cl_event_p         (SCM x);
 SCM scm_cl_sampler_p       (SCM x);
+
+void guile_opencl_init_predicates ();

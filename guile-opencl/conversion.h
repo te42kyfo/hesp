@@ -1,5 +1,53 @@
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
-#include "guile-opencl.h"
+#include <libguile.h>
+#include <CL/cl.h>
+
+/* unlike C99, OpenCL specifies the length of each datatype exactly.This table
+   serves as an overview:
+
+   | name           | cl_type   | c_type   |
+   |----------------+-----------+----------|
+   | bool           | cl_bool   | uint32_t |
+   | char           | cl_char   | int8_t   |
+   | unsigned char  | cl_uchar  | uint8_t  |
+   | short          | cl_short  | int16_t  |
+   | unsigned short | cl_ushort | uint16_t |
+   | int            | cl_int    | int32_t  |
+   | unsigned int   | cl_uint   | uint32_t |
+   | long           | cl_long   | int64_t  |
+   | unsigned long  | cl_ulong  | uint64_t |
+   | float          | cl_float  | float    |
+   | double         | cl_double | double   |
+   | half           | cl_half   | half     |
+
+   The following macros allow intuitive conversion from cl_* types to SCM and
+   vice versa.
+   TODO what shall be done with half?
+*/
+#define scm_from_cl_bool(x)   scm_from_uint32(x)
+#define scm_from_cl_char(x)   scm_from_int8  (x)
+#define scm_from_cl_uchar(x)  scm_from_uint8 (x)
+#define scm_from_cl_short(x)  scm_from_int16 (x)
+#define scm_from_cl_ushort(x) scm_from_uint16(x)
+#define scm_from_cl_int(x)    scm_from_int32 (x)
+#define scm_from_cl_uint(x)   scm_from_uint32(x)
+#define scm_from_cl_long(x)   scm_from_int64 (x)
+#define scm_from_cl_ulong(x)  scm_from_uint64(x)
+#define scm_from_cl_float(x)  scm_from_double((double)x)
+#define scm_from_cl_double(x) scm_from_double((double)x)
+
+#define scm_to_cl_bool(x)   scm_to_uint32(x)
+#define scm_to_cl_char(x)   scm_to_int8  (x)
+#define scm_to_cl_uchar(x)  scm_to_uint8 (x)
+#define scm_to_cl_short(x)  scm_to_int16 (x)
+#define scm_to_cl_ushort(x) scm_to_uint16(x)
+#define scm_to_cl_int(x)    scm_to_int32 (x)
+#define scm_to_cl_uint(x)   scm_to_uint32(x)
+#define scm_to_cl_long(x)   scm_to_int64 (x)
+#define scm_to_cl_ulong(x)  scm_to_uint64(x)
+#define scm_to_cl_float(x)  (float)scm_to_double(x)
+#define scm_to_cl_double(x) scm_to_double(x)
 
 /* These commands wrap a given OpenCL handle in a Guile Smob. They do
    always succeed. */
@@ -34,3 +82,5 @@ cl_program       scm_to_cl_program       (SCM program,       const char *subr);
 cl_kernel        scm_to_cl_kernel        (SCM kernel,        const char *subr);
 cl_event         scm_to_cl_event         (SCM event,         const char *subr);
 cl_sampler       scm_to_cl_sampler       (SCM sampler,       const char *subr);
+
+void guile_opencl_init_conversion();

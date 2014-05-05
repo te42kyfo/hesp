@@ -1,0 +1,46 @@
+This document is my attempt to document my design decisions and the usage of
+guile-opencl. Feel free to send feedback and ideas to <marco.heisig@fau.de>.
+
+* Design Decisions
+** No blocking enqueue operations
+   I omitted blocking enqueue operations. They can be easily emulated and are
+   usually a bad practise. As a result I have one boolean parameter less in
+   those function signatures.
+
+** guile-opencl calls are not performance critical
+   I designed the library explicitly with High Performance Computing (HPC) in
+   mind. However the compute time is not burnt during OpenCL setup, but within
+   compute kernels and memory transfers. So I assume for each of the high
+   level functions that the caller is willing to spend 5 or 10 CPU cycles for
+   decadence like type checking.
+
+   Should you ever encounter a guile-opencl function that is a bottleneck for
+   your application (which I doubt) you can still switch from Guile to plain
+   C. Therefore use the conversion routines from guile-opencl.h and use the
+   plain OpenCL C API for this particular operation.
+
+** (at least) the same feature set as the OpenCL C API.
+   If there is a feature that you can use from the C API and not from
+   guile-opencl, this is a bug.
+
+** Stability
+   Following the Guile philosophy, every operation should be checked in a way
+   that the program will not crash. All error conditions are properly
+   signalled via Guile exceptions. There shall be no memory leaks, not even in
+   the case of explicit malloc followed by a non-local exit. This is possible
+   due to Guile's dynamic-wind facility.
+
+** Beauty
+   Many cumbersome C operations can be avoided by exploiting the rich Guile
+   feature set.
+
+   Examples:
+   - f(num_foo, foo*) constructs can be replaced by a list (foo1 foo2 ...)
+   - cl_uint err is immediately checked and reported via scm_misc_error()
+   - different string encodings are possible and easy (see Guile manual)
+   - cl-info presents all information about any given OpenCL object in an
+     easily accessible alist. This is possible due to the dynamic type system.
+
+* Usage
+  TODO create examples directory
+

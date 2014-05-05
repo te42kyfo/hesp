@@ -1,5 +1,7 @@
+/* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
-#include "guile-opencl.h"
+#include <libguile.h>
+#include "CL/cl.h"
 
 /* If the given value is CL_SUCCESS, do nothing, else throw an appropriate
    guile error message. */
@@ -13,3 +15,5 @@ void cl_callback(const char *errinfo,
                  const void *private_info,
                  size_t cb,
                  void *user_data);
+
+void guile_opencl_init_error();

@@ -1,4 +1,5 @@
 /* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
+#include <libguile.h>
 
-void init_guile_opencl();
+void guile_opencl_init_event();
