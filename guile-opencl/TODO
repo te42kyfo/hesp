@@ -1,17 +1,11 @@
-An incomplete list of open issues one might address somedays
-
-- all OpenCL constants except the error codes are assumed to be cl_uint.  This
-  is not true for cl_bitfield and cl_build_status. I should change this.
+An incomplete list of open issues one might address sooner or later. Some of
+them are also just fancy ideas.
 
 - all OpenCL handles must be small enough to fit into the data cell of a
   SMOB. CL/cl.h declares them as pointers, so everyting should be fine. Maybe
   a compile time check would be appropriate.
 
 - install specially taylored callbacks by default
-
-- substitute all methods that work on pointers, lengths and offsets with Guile
-  bytevectors. Bytevectors can alias and have their length tracked and are
-  therefore no downgrade.
 
 - Instead of copy rectangle, provide a cl-copy-array function that takes any
   array, shared array, vector or bytevector and moves it from/to a device.
@@ -20,3 +14,13 @@ An incomplete list of open issues one might address somedays
 
 - Image support is completely missing. This includes kernel arguments,
   samplers and all routines working on images.
+
+- SCM to OpenCL conversions are always type-checked. However many other data
+  types might not get checked.
+
+- Implement a mechanism similar to "current-input-port", etc. for
+  cl-contexts or queues.
+
+- Check whether all SCM bytevectors on the C stack are properly remembered
+
+- Use autotools

@@ -10,7 +10,7 @@ SCM_DEFINE (scm_get_cl_platform_info, "cl-platform-info", 2, 0, 0,
             "Return information of the OpenCl platform @var{platform}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_platform_id   p   = scm_to_cl_platform_id_here(platform);
-    cl_platform_info pn  = scm_to_uint32(param_name);
+    cl_platform_info pn  = scm_to_cl_uint(param_name);
     size_t buf_len;
     CL_CHECK( clGetPlatformInfo(p, pn, 0, NULL, &buf_len) );
     char buffer[buf_len];
@@ -23,7 +23,7 @@ SCM_DEFINE (scm_get_cl_device_info, "cl-device-info", 2, 0, 0,
             "Return information of the OpenCl device @var{device}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_device_id   d  = scm_to_cl_device_id_here(device);
-    cl_device_info pn = scm_to_uint32(param_name);
+    cl_device_info pn = scm_to_cl_uint(param_name);
     size_t buf_len;
     CL_CHECK( clGetDeviceInfo(d, pn, 0, NULL, &buf_len) );
     char buffer[buf_len];
@@ -179,7 +179,7 @@ SCM_DEFINE (scm_get_cl_mem_info, "cl-mem-info", 2, 0, 0,
             "Return information of the OpenCl memory object @var{mem}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_mem      m  = scm_to_cl_mem_here(mem);
-    cl_mem_info pn = scm_to_uint32(param_name);
+    cl_mem_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetMemObjectInfo(m, pn, 0, NULL, &buf_len) );
@@ -201,7 +201,7 @@ SCM_DEFINE (scm_get_cl_context_info, "cl-context-info", 2, 0, 0,
             "Return information of the OpenCl context @var{context}"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_context      c  = scm_to_cl_context_here(context);
-    cl_context_info pn = scm_to_uint32(param_name);
+    cl_context_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetContextInfo(c, pn, 0, NULL, &buf_len) );
@@ -235,7 +235,7 @@ SCM_DEFINE (scm_get_cl_command_queue_info, "cl-command-queue-info", 2, 0, 0,
             "Return information of the OpenCl command-queue @var{command_queue}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_command_queue      cq = scm_to_cl_command_queue_here(command_queue);
-    cl_command_queue_info pn = scm_to_uint32(param_name);
+    cl_command_queue_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetCommandQueueInfo(cq, pn, 0, NULL, &buf_len) );
@@ -263,7 +263,7 @@ SCM_DEFINE (scm_get_cl_program_info, "cl-program-info", 2, 0, 0,
             "Return information of the OpenCl program @var{program}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_program      p  = scm_to_cl_program_here(program);
-    cl_program_info pn = scm_to_uint32(param_name);
+    cl_program_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetProgramInfo(p, pn, 0, NULL, &buf_len) );
@@ -284,7 +284,7 @@ SCM_DEFINE (scm_get_cl_kernel_info, "cl-kernel-info", 2, 0, 0,
             "Return information of the OpenCl kernel @var{kernel}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_kernel      k  = scm_to_cl_kernel_here(kernel);
-    cl_kernel_info pn = scm_to_uint32(param_name);
+    cl_kernel_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetKernelInfo(k, pn, 0, NULL, &buf_len) );
@@ -315,7 +315,7 @@ SCM_DEFINE (scm_get_cl_event_info, "cl-event-info", 2, 0, 0,
             "Return information of the OpenCl event @var{event}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_event        e  = scm_to_cl_event_here(event);
-    cl_sampler_info pn = scm_to_uint32(param_name);
+    cl_sampler_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetEventInfo(e, pn, 0, NULL, &buf_len) );
@@ -336,7 +336,7 @@ SCM_DEFINE (scm_get_cl_sampler_info, "cl-sampler-info", 2, 0, 0,
             "Return information of the OpenCl sampler @var{sampler}\n"
             "specified by the OpenCL constant @var{param_name}.") {
     cl_sampler      s  = scm_to_cl_sampler_here(sampler);
-    cl_sampler_info pn = scm_to_uint32(param_name);
+    cl_sampler_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetSamplerInfo(s, pn, 0, NULL, &buf_len) );
@@ -364,7 +364,7 @@ SCM_DEFINE (scm_get_cl_program_build_info, "cl-program-build-info", 3, 0, 0,
             "@var{param_name}.") {
     cl_program      p  = scm_to_cl_program_here(program);
     cl_device_id    d  = scm_to_cl_device_id_here(device);
-    cl_sampler_info pn = scm_to_uint32(param_name);
+    cl_sampler_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
     CL_CHECK( clGetProgramBuildInfo(p, d, pn, 0, NULL, &buf_len) );

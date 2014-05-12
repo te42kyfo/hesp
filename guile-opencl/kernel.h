@@ -2,28 +2,26 @@
 #pragma once
 #include <libguile.h>
 
-/* kernel related functions */
-
 /* Example usage:
- * cl-make-kernel(program "convolution"
+ * cl-make-kernel(program1 "convolution"
  *                (list
  *                 cl_image
  *                 cl_image
  *                 cl_int
  *                 cl_int
- *                 cl_buffer
+ *                 cl_mem
  *                 cl_int
  *                 cl_sampler))
  *
- * Valid types for the arglist are all built-in scalar OpenCL types, together
- * with cl_event.
+ * Valid types for the arglist are all built-in scalar OpenCL types (except
+ * cl_half), together with cl_event and cl_mem
  */
-//SCM scm_make_cl_kernel (SCM program, SCM name, SCM arglist);
+SCM scm_make_cl_kernel (SCM program, SCM name);
 
-SCM scm_enqueue_kernel (SCM command_queue,
-                        SCM offset_list, SCM global_list, SCM local_list,
-                        SCM event_wait_list); // -> event
+SCM scm_set_cl_kernel_arg (SCM kernel, SCM argnum, SCM bv);
 
-SCM scm_set_kernel_arg (SCM kernel, SCM argnum, SCM value);
+SCM scm_enqueue_cl_kernel (SCM command_queue, SCM kernel,
+                           SCM offset_list, SCM global_list, SCM local_list,
+                           SCM event_wait_list); // -> event
 
 void guile_opencl_init_kernel();

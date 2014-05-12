@@ -8,7 +8,7 @@ SCM_DEFINE (scm_make_cl_buffer, "cl-make-buffer", 4, 0, 0,
             (SCM context, SCM flags, SCM size, SCM host_ptr),
             "Allocate an OpenCL buffer of size @var{size}.") {
     cl_context   c   = scm_to_cl_context_here(context);
-    cl_mem_flags f   = (cl_mem_flags)scm_to_uint32(flags);
+    cl_mem_flags f   = (cl_mem_flags)scm_to_cl_ulong(flags);
     size_t       s   = scm_to_size_t(size);
     void        *hp  = scm_to_pointer(host_ptr);
 

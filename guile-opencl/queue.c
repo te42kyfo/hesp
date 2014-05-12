@@ -22,9 +22,9 @@ SCM_DEFINE (scm_make_cl_queue, "cl-make-queue", 2, 1, 0,
 
 SCM_DEFINE (scm_cl_enqueue_marker, "cl-enqueue-marker", 1, 0, 1,
             (SCM queue, SCM events),
-            "Enqueue a marker in queue @var{queue}."
+            "Enqueue a marker in queue @var{queue}.\n"
             "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.\n") {
+            "before the operation starts.") {
     return SCM_EOL; // TODO
 }
 
@@ -33,15 +33,15 @@ SCM_DEFINE (scm_cl_enqueue_barrier, "cl-enqueue-barrier", 2, 0, 1,
             "Enqueue a barrier for the all OpenCL memory objects\n"
             "in the list @var{mems} in the queue @var{queue}."
             "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.\n") {
+            "before the operation starts.") {
     return SCM_EOL; // TODO
 }
 
 SCM_DEFINE (scm_cl_enqueue_wait, "cl-enqueue-wait", 1, 0, 1,
             (SCM queue, SCM events),
-            "Enqueue a barrier in queue @var{queue}."
+            "Enqueue a barrier in queue @var{queue}.\n"
             "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.\n") {
+            "before the operation starts.") {
     return SCM_EOL; // TODO
 }
 

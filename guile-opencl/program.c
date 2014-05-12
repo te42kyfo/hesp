@@ -23,6 +23,15 @@ SCM_DEFINE (scm_string_to_cl_program, "string->cl-program", 2, 0, 0,
     return scm_from_cl_program(program);
 }
 
+SCM_DEFINE (scm_binary_to_cl_program, "binary->cl-program", 3, 0, 0,
+            (SCM context, SCM devices, SCM binaries),
+            "Create an OpenCL program for context @var{context}\n"
+            "from a list of OpenCL devices @var{devices} and a list\n"
+            "of same length with bytevectors containing the program\n"
+            "binaries." ) {
+    return SCM_EOL; // TODO
+}
+
 SCM_DEFINE (scm_build_cl_program, "cl-build-program", 3, 0, 0,
             (SCM program, SCM devices, SCM options),
             "Compile the sourcecode of the OpenCL program @var{program}\n"
@@ -40,16 +49,6 @@ SCM_DEFINE (scm_build_cl_program, "cl-build-program", 3, 0, 0,
     }
     CL_CHECK( clBuildProgram(p, n, d, o, NULL, NULL) ); // TODO add callback
     return program;
-}
-
-
-SCM_DEFINE (scm_binary_to_cl_program, "binary->cl-program", 3, 0, 0,
-            (SCM context, SCM devices, SCM binaries),
-            "Create an OpenCL program for context @var{context}\n"
-            "from a list of OpenCL devices @var{devices} and a list\n"
-            "of same length with bytevectors containing the program\n"
-            "binaries." ) {
-    return SCM_EOL; // TODO
 }
 
 void guile_opencl_init_program() {
