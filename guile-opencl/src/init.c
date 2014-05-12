@@ -1,7 +1,23 @@
 /* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #include <libguile.h>
 #include "init.h"
-#include "guile-opencl.h"
+#include "buffer.h"
+#include "constants.h"
+#include "context.h"
+#include "conversion.h"
+#include "device.h"
+#include "error.h"
+#include "event.h"
+#include "image.h"
+#include "info.h"
+#include "init.h"
+#include "kernel.h"
+#include "platform.h"
+#include "predicates.h"
+#include "print.h"
+#include "program.h"
+#include "queue.h"
+#include "sampler.h"
 
 void init_guile_opencl() {
     guile_opencl_tag = scm_make_smob_type("OpenCL", sizeof(void *));
