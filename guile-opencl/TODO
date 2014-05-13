@@ -23,4 +23,6 @@ them are also just fancy ideas.
 
 - Check whether all SCM bytevectors on the C stack are properly remembered
 
-- Use autotools
+- Write a ax_opencl.m4 to portably detect the OpenCL header and library.
+
+- Provide examples

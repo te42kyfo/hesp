@@ -39,7 +39,7 @@ guile-opencl. Feel free to send feedback and ideas to <marco.heisig@fau.de>.
    - cl_uint err is immediately checked and reported via scm_misc_error()
    - different string encodings are possible and easy (see Guile manual)
    - cl-info presents all information about any given OpenCL object in an
-     easily accessible alist. This is possible due to the dynamic type system.
+     easily accessible alist via dynamic dispatch.
 
 * Usage
   TODO create examples directory

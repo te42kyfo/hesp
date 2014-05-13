@@ -5,12 +5,19 @@
 #include "constants.h"
 #include "predicates.h"
 
+/* ensure compatibility across guile versions */
+#ifndef SCM_NEWSMOB
+#define SCM_NEWSMOB(smob, tag, data) \
+    smob = scm_new_smob(tag, data);
+#endif
+
 #define SCM_FROM_CL_BODY(handle, tag)                            \
-    SCM x = scm_new_smob(guile_opencl_tag, (scm_t_bits)handle);  \
+    SCM x;                                                       \
+    SCM_NEWSMOB(x, guile_opencl_tag, (scm_t_bits)handle);        \
     SCM_SET_SMOB_FLAGS(x, tag);                                  \
     return x
 
-SCM scm_from_cl_platform_id   (cl_platform_id     handle) {
+SCM scm_from_cl_platform_id   (cl_platform_id   handle) {
     SCM_FROM_CL_BODY(handle, cl_platform_tag);
 }
 SCM scm_from_cl_device_id     (cl_device_id     handle) {

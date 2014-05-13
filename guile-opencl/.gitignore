@@ -15,3 +15,9 @@ lib/*
 .libs
 .deps
 *.x
+,*
++*
+*.la
+*.lo
+*.o
+stamp-h[0-9]

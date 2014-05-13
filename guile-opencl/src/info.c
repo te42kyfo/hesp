@@ -220,8 +220,7 @@ SCM_DEFINE (scm_get_cl_context_info, "cl-context-info", 2, 0, 0,
         cl_uint num_devices = scm_to_cl_uint(scm_num_devices);
         // TODO unsafe code if device list is concurrently modified
         for(cl_uint ui = 0; ui < num_devices; ++ui) {
-            SCM smob = scm_new_smob(guile_opencl_tag, (scm_t_bits)devices[ui]);
-            SCM_SET_SMOB_FLAGS(smob, cl_device_tag);
+            SCM smob = scm_from_cl_device_id(devices[ui]);
             ret = scm_cons(smob, ret);
         }
         return ret;

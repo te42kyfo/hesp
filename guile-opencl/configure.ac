@@ -1,12 +1,13 @@
 AC_PREREQ(2.61)
 AC_INIT(guile-opencl, 0.1, marco.heisig@fau.de)
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_CC_C99
 AC_PROG_INSTALL
 AC_LANG_C
-AC_CONFIG_MACRO_DIR([m4])
 
 LT_PREREQ([2.4.2])
 LT_INIT

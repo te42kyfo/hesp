@@ -4,13 +4,22 @@
 #include "conversion.h"
 #include "error.h"
 
-SCM_DEFINE (scm_make_cl_buffer, "cl-make-buffer", 4, 0, 0,
-            (SCM context, SCM flags, SCM size, SCM host_ptr),
+SCM_DEFINE (scm_make_cl_buffer, "cl-make-buffer", 3, 1, 0,
+            (SCM context, SCM flags, SCM size, SCM bv),
             "Allocate an OpenCL buffer of size @var{size}.") {
     cl_context   c   = scm_to_cl_context_here(context);
     cl_mem_flags f   = (cl_mem_flags)scm_to_cl_ulong(flags);
     size_t       s   = scm_to_size_t(size);
-    void        *hp  = scm_to_pointer(host_ptr);
+    void        *hp;
+    if(SCM_UNBNDP(bv)) {
+        hp = NULL;
+    } else {
+        SCM_ASSERT_TYPE(scm_to_bool(scm_bytevector_p(bv)), bv, SCM_ARG4,
+                        __func__, "bytevector");
+        size_t len = SCM_BYTEVECTOR_LENGTH(bv);
+        if(len < s) scm_out_of_range(__func__, size);
+        hp = SCM_BYTEVECTOR_CONTENTS(bv);
+    }
 
     cl_int err;
     cl_mem buffer = clCreateBuffer(c, f, s, hp, &err);

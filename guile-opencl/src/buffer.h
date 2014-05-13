@@ -3,7 +3,7 @@
 #include <libguile.h>
 
 /* cl_mem - OpenCL memory management */
-SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM host_ptr);
+SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM bytevector);
 
 /* return a bytevector aliasing another bytevector. I do check that the new
    bytevector does not go beyond the original one, but no further

@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libguile_opencl.la
 libguile_opencl_la_CFLAGS = $(GUILE_CFLAGS)
 libguile_opencl_la_LDFLAGS = -module  $(GUILE_LDFLAGS) $(AM_CFLAGS)
-AM_CPPFLAGS = -I/usr/lib64/OpenCL/global/include
+
 DOT_X_FILES = \
 buffer.x \
 constants.x \
