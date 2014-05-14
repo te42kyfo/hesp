@@ -31,7 +31,7 @@ __kernel void update_velocities( const unsigned int N,
 	real new_force_y = 0;
 	real new_force_z = 0;
 
-	for( unsigned int i = 0; i < 1; i++) {
+	for( unsigned int i = 0; i < N; i++) {
 		if( i == globalid ) continue;
 
 		real dx = px[globalid] - px[i];
