@@ -203,6 +203,3 @@
           (enqueue-read-cl-buffer queue pz-dev 0 vz)
           (cl-finish queue)
           (ascii-write N m px py pz vx vy vz #t))))))
-
-
-

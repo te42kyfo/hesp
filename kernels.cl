@@ -53,6 +53,7 @@ __kernel void update_velocities( const unsigned int N,
 
 	}
 
+
 	vx[globalid] += (fx[globalid] + new_force_x) * dt * 0.5 / m[globalid];
 	vy[globalid] += (fy[globalid] + new_force_y) * dt * 0.5 / m[globalid];
 	vz[globalid] += (fz[globalid] + new_force_z) * dt * 0.5 / m[globalid];
