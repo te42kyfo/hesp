@@ -1,2 +1,10 @@
-asda sss
-sda  sdasda
+part_input_file parting
+timestep_length 0.01
+time_end 1
+epsilon 1
+sigma 0.25
+part_out_freq 5
+part_out_name_base results_part_
+vtk_out_freq 5
+vtk_out_name_base results_vtk_
+cl_workgroup_1dsize 128
