@@ -18,7 +18,7 @@
  */
 SCM scm_make_cl_kernel (SCM program, SCM name);
 
-SCM scm_set_cl_kernel_arg (SCM kernel, SCM argnum, SCM bv);
+SCM scm_set_cl_kernel_arg (SCM kernel, SCM argnum, SCM bv_or_cl_mem);
 
 SCM scm_enqueue_cl_kernel (SCM command_queue, SCM kernel,
                            SCM offset_list, SCM global_list, SCM local_list,

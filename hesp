@@ -1,2 +1,74 @@
-#!/bin/bash
-LD_LIBRARY_PATH=`pwd`/guile-opencl ./hesp-start
+#!/usr/bin/guile \
+-e main -s
+!#
+
+(use-modules (ice-9 pretty-print)
+             (ice-9 format)
+             (ice-9 rdelim)
+             (ice-9 iconv)
+             (ice-9 binary-ports)
+             (ice-9 receive)
+             (rnrs bytevectors)
+             (system foreign))
+
+(load-extension
+ (string-concatenate
+  (list (getcwd) "/guile-opencl/lib/libguile-opencl.so")) "init_guile_opencl")
+
+; output with exactly the formatting of the reference output
+(define (hesp-print obj)
+  (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))
+    (map (lambda (x)
+           (format #t fmt (car x) (cdr x)))
+         (cl-info obj))))
+
+(define (hesp-select list name)
+  (let* ((len (length list))
+         (selection
+          (if (= 1 len)
+              (car list)
+              (begin
+                (format #t "Avilable ~as:~%" name)
+                (for-each (lambda (item id)
+                            (format #t "~:@(~a~) #~d:~%" name id)
+                            (hesp-print item) (newline))
+                          list (iota len))
+                (format #t "Choose a ~a (from 0 to ~d)~%" name (1- len))
+                (list-ref list (string->number (read-line)))))))
+    (format #t "Using the following ~a:~%" name)
+    (hesp-print selection)
+    (newline)
+    selection))
+
+(define scale-src "
+__kernel void scale(__global float* data, float scalar) {
+    int idx = get_global_id(0);
+    data[idx] = data[idx] * scalar;
+}")
+
+(define (main args)
+  (let* ((platform (hesp-select (get-cl-platforms) "platform"))
+         (device   (hesp-select (get-cl-devices platform) "device"))
+         (context  (make-cl-context device))
+         (queue    (make-cl-queue context device))
+         (program  (build-cl-program
+                    (string->cl-program context scale-src)
+                    (list device)
+                    "-cl-fast-relaxed-math"))
+         (scale-kernel (make-cl-kernel program "scale")))
+    (let* ((N     10)
+           (A     (make-f32vector N 42.0))
+           (A-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                   (* N (sizeof float)))))
+      (enqueue-write-cl-buffer queue A-dev 0 A)
+      (cl-finish queue)
+      (set-cl-kernel-arg scale-kernel 0 A-dev)
+      (set-cl-kernel-arg scale-kernel 1 (make-f32vector 1 2.0))
+      (enqueue-cl-kernel queue scale-kernel
+                         (list 0)
+                         (list N)
+                         (list 10))
+      (enqueue-read-cl-buffer queue A-dev 0 A)
+      (cl-finish queue)
+      (format #t "~a\n" A)
+      (format #t "all good!\n"))))
