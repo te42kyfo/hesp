@@ -68,21 +68,25 @@
              (update-positions-kernel (make-cl-kernel program "update_positions"))
 			 (update-velocities-kernel (make-cl-kernel program "update_velocities")))
 
+
+
+
 		(let* ((param-file (cadr args))
                (N     6)
 			   (dt    0.1)
 			   (epsilon    0.1)
-			   (sigma    0.1)
+			   (sigma    0.04)
+
 
 			   (px     (make-f32vector N 0.0))
 			   (py     (make-f32vector N 0.0))
 			   (pz     (make-f32vector N 0.0))
-			   (vx     (make-f32vector N 0.2))
+			   (vx     (make-f32vector N 0.0))
 			   (vy     (make-f32vector N 0.0))
 			   (vz     (make-f32vector N 0.0))
 
 			   (m      (make-f32vector N 1.0))
-			   (fx     (make-f32vector N -0.05))
+			   (fx     (make-f32vector N 0.0))
 			   (fy     (make-f32vector N 0.0))
 			   (fz     (make-f32vector N 0.0))
 			   (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
@@ -155,18 +159,23 @@
 
           (format #t "~a\n" px)
 
+		  (do ((i 0 (1+ i)))
+			  (( >= i 100 ))
+			(enqueue-cl-kernel queue update-velocities-kernel
+                             (list 0)
+                             (list N)
+                             (list N))
  		  (enqueue-cl-kernel queue update-positions-kernel
                             (list 0)
                              (list N)
                              (list N))
-		  (enqueue-cl-kernel queue update-velocities-kernel
-                             (list 0)
-                             (list N)
-                             (list N))
+
+
 
 		  (enqueue-read-cl-buffer queue px-dev 0 px)
           (cl-finish queue)
-		  (format #t "~a\n" px)
+		  (format #t "~a\n" px) ) 
+
 
 
 

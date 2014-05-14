@@ -16,6 +16,7 @@ __kernel void update_positions( const unsigned int N, const real dt, global real
 
 
 
+
 __kernel void update_velocities( const unsigned int N,
 								 const real dt, const real epsilon, const real sigma,
 								 global real * m,
