@@ -278,4 +278,3 @@
             (enqueue-read-cl-buffer queue fy-dev 0 fy)
             (enqueue-read-cl-buffer queue fz-dev 0 fz)
             (cl-finish queue)))))))
-
