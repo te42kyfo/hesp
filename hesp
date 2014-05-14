@@ -45,7 +45,7 @@
   (let ((buffers (list m px py pz vx vy vz)))
     (do ((i 0 (1+ i)))
         ((>= i N))
-      (format port "~{~6,4@f ~}~%"
+      (format port "~{~10,4@f ~}~%"
               (map (lambda (vec)
                      (realvector-ref vec i))
                    buffers)))))
@@ -64,6 +64,7 @@
          (read-string (open-input-file "kernels.cl")))))
 
 (define (main args)
+
   (if (= 1 (length args))
       (error  "please specify a parameter file!"))
   (let* ((platform (hesp-select (get-cl-platforms) "platform"))
@@ -79,10 +80,10 @@
     (let ((update-positions-kernel  (make-cl-kernel program "update_positions"))
           (update-velocities-kernel (make-cl-kernel program "update_velocities")))
       (let* ((param-file (cadr args))
-             (N     6)
+             (N     32)
              (dt    0.1)
              (epsilon    0.1)
-             (sigma    0.04)
+             (sigma    0.25)
              (px     (make-realvector N 0.0))
              (py     (make-realvector N 0.0))
              (pz     (make-realvector N 0.0))
@@ -116,7 +117,8 @@
                                      (* N (sizeof float)))))
         (do ((i 0 (1+ i)))
             (( >= i N ))
-          (realvector-set! px i (/ i N)))
+          (realvector-set! px i (/ i N))
+          (realvector-set! px 0 -0.2))
 
         (enqueue-write-cl-buffer queue px-dev 0 px)
         (enqueue-write-cl-buffer queue py-dev 0 py)
@@ -170,13 +172,15 @@
                              (list N)
                              (list N))
           (cl-finish queue))
-          (enqueue-read-cl-buffer queue px-dev 0 m)
-          (enqueue-read-cl-buffer queue px-dev 0 px)
-          (enqueue-read-cl-buffer queue py-dev 0 py)
-          (enqueue-read-cl-buffer queue pz-dev 0 pz)
-          (enqueue-read-cl-buffer queue pz-dev 0 vx)
-          (enqueue-read-cl-buffer queue pz-dev 0 vy)
-          (enqueue-read-cl-buffer queue pz-dev 0 vz)
-          (cl-finish queue)
-          (ascii-write N m px py pz vx vy vz #t)))))
+        (enqueue-read-cl-buffer queue px-dev 0 m)
+        (enqueue-read-cl-buffer queue px-dev 0 px)
+        (enqueue-read-cl-buffer queue py-dev 0 py)
+        (enqueue-read-cl-buffer queue pz-dev 0 pz)
+        (enqueue-read-cl-buffer queue pz-dev 0 vx)
+        (enqueue-read-cl-buffer queue pz-dev 0 vy)
+        (enqueue-read-cl-buffer queue pz-dev 0 vz)
+        (cl-finish queue)
+        (ascii-write N m px py pz vx vy vz #t)))))
+
+
 

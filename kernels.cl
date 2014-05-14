@@ -61,8 +61,4 @@ __kernel void update_velocities( const unsigned int N,
 	fy[globalid] = new_force_y;
 	fz[globalid] = new_force_z;
 
-
-
-
-
 }
