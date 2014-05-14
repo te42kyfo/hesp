@@ -17,9 +17,29 @@ SCM_DEFINE (scm_string_to_cl_program, "string->cl-program", 2, 0, 0,
     src = scm_to_locale_stringn(sourcecode, &len);
     cl_program  program = clCreateProgramWithSource(c, 1,
                                                     (const char **)&src, &len, &err);
-    scm_dynwind_free(src);
+
+	size_t log_size;
+	clGetProgramBuildInfo(program, 0, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+
+	printf("error length: %d", log_size);
+
+
+	scm_dynwind_free(src);
     scm_dynwind_end();
+
+
+
+
+	/*	char log[log_size+2];
+
+    clGetProgramBuildInfo(program, 0, CL_PROGRAM_BUILD_LOG, log_size, log, NULL);
+
+	*/
+    // Print the log
+	//  printf("%s\n", log);
+
     CL_CHECK( err );
+
     return scm_from_cl_program(program);
 }
 

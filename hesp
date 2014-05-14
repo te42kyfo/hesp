@@ -44,12 +44,11 @@
 (define make-realvector make-f32vector)
 (define typedef-real "typedef float real;")
 
-(define force-src
+(define kernels-src
   (string-concatenate
    (list typedef-real
          (with-input-from-file
-             "force.cl" (lambda () (read-string))))))
-
+             "kernels.cl" (lambda () (read-string))))))
 
 
 (define (main args)
@@ -63,17 +62,24 @@
              (context  (make-cl-context device))
              (queue    (make-cl-queue context device))
              (program  (build-cl-program
-                        (string->cl-program context force-src)
+                        (string->cl-program context kernels-src)
                         (list device)
                         "-cl-fast-relaxed-math"))
-             (force-kernel (make-cl-kernel program "force")))
-        (let* ((param-file (cadr args))
-               (N     10)
+             (update-positions-kernel (make-cl-kernel program "update_positions"))
+			 (update-velocities-kernel (make-cl-kernel program "update_velocities")))
+
+		(let* ((param-file (cadr args))
+               (N     6)
+			   (dt    0.1)
 			   (px     (make-f32vector N 0.0))
 			   (py     (make-f32vector N 0.0))
 			   (pz     (make-f32vector N 0.0))
+			   (vx     (make-f32vector N 0.2))
+			   (vy     (make-f32vector N 0.0))
+			   (vz     (make-f32vector N 0.0))
+
 			   (m      (make-f32vector N 1.0))
-			   (fx     (make-f32vector N 0.0))
+			   (fx     (make-f32vector N -0.05))
 			   (fy     (make-f32vector N 0.0))
 			   (fz     (make-f32vector N 0.0))
 			   (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
@@ -89,7 +95,14 @@
 			   (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
 									   (* N (sizeof float))))
 			   (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (vx-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (vy-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
 									   (* N (sizeof float)))) )
+
 		  (do ((i 0 (1+ i)))
 			  (( >= i N ))
 			(bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)) )
@@ -101,27 +114,59 @@
 		  (enqueue-write-cl-buffer queue fx-dev 0 fx)
 		  (enqueue-write-cl-buffer queue fy-dev 0 fy)
 		  (enqueue-write-cl-buffer queue fz-dev 0 fz)
+		  (enqueue-write-cl-buffer queue vx-dev 0 vx)
+		  (enqueue-write-cl-buffer queue vy-dev 0 vy)
+		  (enqueue-write-cl-buffer queue vz-dev 0 vz)
 
 
           (cl-finish queue)
 
-		  (set-cl-kernel-arg force-kernel 0 (make-u32vector 1 N) )
-		  (set-cl-kernel-arg force-kernel 1 m-dev)
-		  (set-cl-kernel-arg force-kernel 2 px-dev)
-		  (set-cl-kernel-arg force-kernel 3 py-dev)
-		  (set-cl-kernel-arg force-kernel 4 pz-dev)
-		  (set-cl-kernel-arg force-kernel 5 fx-dev)
-		  (set-cl-kernel-arg force-kernel 6 fx-dev)
-		  (set-cl-kernel-arg force-kernel 7 fz-dev)
+		  (set-cl-kernel-arg update-positions-kernel 0 (make-u32vector 1 N) )
+		  (set-cl-kernel-arg update-positions-kernel 1 (make-f32vector 1 dt) )
+		  (set-cl-kernel-arg update-positions-kernel 2 m-dev)
+		  (set-cl-kernel-arg update-positions-kernel 3 px-dev)
+		  (set-cl-kernel-arg update-positions-kernel 4 py-dev)
+		  (set-cl-kernel-arg update-positions-kernel 5 pz-dev)
+		  (set-cl-kernel-arg update-positions-kernel 6 vx-dev)
+		  (set-cl-kernel-arg update-positions-kernel 7 vx-dev)
+		  (set-cl-kernel-arg update-positions-kernel 8 vz-dev)
+		  (set-cl-kernel-arg update-positions-kernel 9 fx-dev)
+		  (set-cl-kernel-arg update-positions-kernel 10 fx-dev)
+		  (set-cl-kernel-arg update-positions-kernel 11 fz-dev)
 
-          (enqueue-cl-kernel queue force-kernel
+		  (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
+		  (set-cl-kernel-arg update-velocities-kernel 1 (make-f32vector 1 dt) )
+		  (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 episolon) )
+		  (set-cl-kernel-arg update-velocities-kernel 3 (make-f32vector 1 sigma) )
+		  (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 5 px-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 6 py-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 7 pz-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 8 vx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 9 vx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 10 vz-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 11 fx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 12 fx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
+
+
+          (format #t "~a\n" px)
+
+ 		  (enqueue-cl-kernel queue update-positions-kernel
                              (list 0)
                              (list N)
-                             (list 10))
-		  
-		  (enqueue-read-cl-buffer queue fx-dev 0 fx)
+                             (list N))
+		  (enqueue-cl-kernel queue update-velocities-kernel
+                             (list 0)
+                             (list N)
+                             (list N))
+
+		  (enqueue-read-cl-buffer queue px-dev 0 px)
           (cl-finish queue)
-          (format #t "~a\n" fx)
+		  (format #t "~a\n" px)
+
+
+
           (format #t "all good!\n"))))
     ; generic exception handler
     (lambda (key . args)
