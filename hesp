@@ -11,19 +11,11 @@
              (system foreign))
 
 (load-extension
- (string-concatenate
-  (list (getcwd) "/guile-opencl/lib/libguile-opencl.so")) "init_guile_opencl")
+ (string-append (getcwd) "/guile-opencl/lib/libguile-opencl.so")
+ "init_guile_opencl")
 
-(define read-string
-  (lambda ()
-    (let lp ((string "")
-	     (line (read-line)))
-      (if (eof-object? line)
-	  string
-	  (lp (string-append string line)
-	      (read-line))))))
+(load (string-append (getcwd) "/read-string.scm"))
 
-; output with exactly the formatting of the reference output
 (define (hesp-print obj)
   (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))
     (map (lambda (x)
@@ -43,24 +35,19 @@
                           list (iota len))
                 (format #t "Choose a ~a (from 0 to ~d)~%" name (1- len))
                 (list-ref list (string->number (read-line)))))))
-    ;(format #t "Using the following ~a:~%" name)
-    ;(hesp-print selection)
     (newline)
     selection))
 
-
+(define real float)
 (define make-realvector make-f32vector)
-(define typedef-real "typedef float real;")
+(define typedef-real "typedef float real;\n")
 
 (define kernels-src
   (string-concatenate
    (list typedef-real
-         (with-input-from-file
-             "kernels.cl" (lambda () (read-string))))))
-
+         (read-string (open-input-file "kernels.cl")))))
 
 (define (main args)
-
   (catch #t
     (lambda ()
       (if (= 1 (length args))
@@ -73,100 +60,94 @@
                         (string->cl-program context kernels-src)
                         (list device)
                         "-cl-fast-relaxed-math"))
-             (update-positions-kernel (make-cl-kernel program "update_positions"))
-			 (update-velocities-kernel (make-cl-kernel program "update_velocities")))
 
-
-
-
-		(let* ((param-file (cadr args))
+             (update-positions-kernel  (make-cl-kernel program "update_positions"))
+             (update-velocities-kernel (make-cl-kernel program "update_velocities")))
+        (let* ((param-file (cadr args))
                (N     100)
-			   (dt    0.1)
-			   (epsilon    1.0)
-			   (sigma    0.2)
+               (dt    0.1)
+               (epsilon    0.1)
+               (sigma    0.5)
+               (px     (make-f32vector N 0.0))
+               (py     (make-f32vector N 0.0))
+               (pz     (make-f32vector N 0.0))
+               (vx     (make-f32vector N 0.0))
+               (vy     (make-f32vector N 0.0))
+               (vz     (make-f32vector N 0.0))
 
+               (m      (make-f32vector N 0.00001))
+               (fx     (make-f32vector N 0.0))
+               (fy     (make-f32vector N 0.0))
+               (fz     (make-f32vector N 0.0))
+               (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (pz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (m-dev  (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (fx-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (vx-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (vy-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float))))
+               (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                       (* N (sizeof float)))))
 
-			   (px     (make-f32vector N 0.0))
-			   (py     (make-f32vector N 0.0))
-			   (pz     (make-f32vector N 0.0))
-			   (vx     (make-f32vector N 0.0))
-			   (vy     (make-f32vector N 0.0))
-			   (vz     (make-f32vector N 0.0))
+          (do ((i 0 (1+ i)))
+              (( >= i N ))
+            (bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)))
 
-			   (m      (make-f32vector N 0.00001))
-			   (fx     (make-f32vector N 0.0))
-			   (fy     (make-f32vector N 0.0))
-			   (fz     (make-f32vector N 0.0))
-			   (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (pz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (m-dev  (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (fx-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (vx-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (vy-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float))))
-			   (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-									   (* N (sizeof float)))) )
+            (bytevector-ieee-single-native-set! m 0 100)
+			(bytevector-ieee-single-native-set! px 0 -0.52)
 
-		  (do ((i 0 (1+ i)))
-			  (( >= i N ))
-			(bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)) )
-
-		  (bytevector-ieee-single-native-set! m 0 100.0)
-
-
-
-		  (enqueue-write-cl-buffer queue px-dev 0 px)
-		  (enqueue-write-cl-buffer queue py-dev 0 py)
-		  (enqueue-write-cl-buffer queue pz-dev 0 pz)
-		  (enqueue-write-cl-buffer queue m-dev 0 m)
-		  (enqueue-write-cl-buffer queue fx-dev 0 fx)
-		  (enqueue-write-cl-buffer queue fy-dev 0 fy)
-		  (enqueue-write-cl-buffer queue fz-dev 0 fz)
-		  (enqueue-write-cl-buffer queue vx-dev 0 vx)
-		  (enqueue-write-cl-buffer queue vy-dev 0 vy)
-		  (enqueue-write-cl-buffer queue vz-dev 0 vz)
+          (enqueue-write-cl-buffer queue px-dev 0 px)
+          (enqueue-write-cl-buffer queue py-dev 0 py)
+          (enqueue-write-cl-buffer queue pz-dev 0 pz)
+          (enqueue-write-cl-buffer queue m-dev 0 m)
+          (enqueue-write-cl-buffer queue fx-dev 0 fx)
+          (enqueue-write-cl-buffer queue fy-dev 0 fy)
+          (enqueue-write-cl-buffer queue fz-dev 0 fz)
+          (enqueue-write-cl-buffer queue vx-dev 0 vx)
+          (enqueue-write-cl-buffer queue vy-dev 0 vy)
+          (enqueue-write-cl-buffer queue vz-dev 0 vz)
 
 
           (cl-finish queue)
 
-		  (set-cl-kernel-arg update-positions-kernel 0 (make-u32vector 1 N) )
-		  (set-cl-kernel-arg update-positions-kernel 1 (make-f32vector 1 dt) )
-		  (set-cl-kernel-arg update-positions-kernel 2 m-dev)
-		  (set-cl-kernel-arg update-positions-kernel 3 px-dev)
-		  (set-cl-kernel-arg update-positions-kernel 4 py-dev)
-		  (set-cl-kernel-arg update-positions-kernel 5 pz-dev)
-		  (set-cl-kernel-arg update-positions-kernel 6 vx-dev)
-		  (set-cl-kernel-arg update-positions-kernel 7 vx-dev)
-		  (set-cl-kernel-arg update-positions-kernel 8 vz-dev)
-		  (set-cl-kernel-arg update-positions-kernel 9 fx-dev)
-		  (set-cl-kernel-arg update-positions-kernel 10 fx-dev)
-		  (set-cl-kernel-arg update-positions-kernel 11 fz-dev)
+          (set-cl-kernel-arg update-positions-kernel 0 (make-u32vector 1 N) )
+          (set-cl-kernel-arg update-positions-kernel 1 (make-f32vector 1 dt) )
+          (set-cl-kernel-arg update-positions-kernel 2 m-dev)
+          (set-cl-kernel-arg update-positions-kernel 3 px-dev)
+          (set-cl-kernel-arg update-positions-kernel 4 py-dev)
+          (set-cl-kernel-arg update-positions-kernel 5 pz-dev)
+          (set-cl-kernel-arg update-positions-kernel 6 vx-dev)
+          (set-cl-kernel-arg update-positions-kernel 7 vx-dev)
+          (set-cl-kernel-arg update-positions-kernel 8 vz-dev)
+          (set-cl-kernel-arg update-positions-kernel 9 fx-dev)
+          (set-cl-kernel-arg update-positions-kernel 10 fx-dev)
+          (set-cl-kernel-arg update-positions-kernel 11 fz-dev)
 
-		  (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
-		  (set-cl-kernel-arg update-velocities-kernel 1 (make-f32vector 1 dt) )
-		  (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 epsilon) )
-		  (set-cl-kernel-arg update-velocities-kernel 3 (make-f32vector 1 sigma) )
-		  (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 5 px-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 6 py-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 7 pz-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 8 vx-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 9 vy-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 10 vz-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 11 fx-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
+          (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
+          (set-cl-kernel-arg update-velocities-kernel 1 (make-f32vector 1 dt) )
+          (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 epsilon) )
+          (set-cl-kernel-arg update-velocities-kernel 3 (make-f32vector 1 sigma) )
+          (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
+          (set-cl-kernel-arg update-velocities-kernel 5 px-dev)
+          (set-cl-kernel-arg update-velocities-kernel 6 py-dev)
+          (set-cl-kernel-arg update-velocities-kernel 7 pz-dev)
+          (set-cl-kernel-arg update-velocities-kernel 8 vx-dev)
+          (set-cl-kernel-arg update-velocities-kernel 9 vy-dev)
+          (set-cl-kernel-arg update-velocities-kernel 10 vz-dev)
+          (set-cl-kernel-arg update-velocities-kernel 11 fx-dev)
+          (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
+          (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
 
 ;          (format #t "~a\n" px)
@@ -193,10 +174,7 @@
 
 
 
-
-
           (format #t "all good!\n"))))
-    ; generic exception handler
     (lambda (key . args)
       (format #t "~a in ~a: ~a\n" key (car args) (cadr args)))))
 

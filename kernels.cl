@@ -31,7 +31,7 @@ __kernel void update_velocities( const unsigned int N,
 	real new_force_y = 0;
 	real new_force_z = 0;
 
-	for( unsigned int i = 0; i < N; i++) {
+	for( unsigned int i = 0; i < 1; i++) {
 		if( i == globalid ) continue;
 
 		real dx = px[globalid] - px[i];
@@ -42,7 +42,7 @@ __kernel void update_velocities( const unsigned int N,
 		real sigma6 = sigma*sigma*sigma;
 		sigma6 = sigma6*sigma6;
 
-		real factor =
+		real factor = 
 			24.0*epsilon*invsqlength *
 			sigma6*invsqlength*invsqlength*invsqlength*
 			(2.0*sigma6*invsqlength*invsqlength*invsqlength-1);
@@ -57,8 +57,8 @@ __kernel void update_velocities( const unsigned int N,
 	vy[globalid] += (fy[globalid] + new_force_y) * dt * 0.5 / m[globalid];
 	vz[globalid] += (fz[globalid] + new_force_z) * dt * 0.5 / m[globalid];
 
-	fx[globalid] = globalid; //new_force_x;
-	fy[globalid] = globalid; //new_force_y;
-	fz[globalid] = globalid; //new_force_z;
+	fx[globalid] = new_force_x;
+	fy[globalid] = new_force_y;
+	fz[globalid] = new_force_z;
 
 }
