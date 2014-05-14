@@ -11,13 +11,13 @@ SCM_DEFINE (scm_make_cl_kernel, "make-cl-kernel", 2, 0, 0,
             "Create an OpenCL kernel referring to the function named"
             "@var{name} in the OpenCL program @var{program}") {
     cl_program p = scm_to_cl_program_here(program);
-    char      *c_name;
     cl_int     err;
     cl_kernel  kernel;
-    SCM name_bv = scm_string_to_utf8(name);
-    c_name = SCM_BYTEVECTOR_CONTENTS(name_bv);
+    scm_dynwind_begin(0);
+    char      *c_name = scm_to_locale_string(name);;
     kernel = clCreateKernel(p, c_name, &err);
-    scm_remember_upto_here_1(name_bv);
+    scm_dynwind_free(c_name);
+    scm_dynwind_end();
     CL_CHECK( err );
     return scm_from_cl_kernel(kernel);
 }
@@ -42,7 +42,7 @@ SCM_DEFINE (scm_set_cl_kernel_arg, "set-cl-kernel-arg", 3, 0, 0,
     } else {
         s = sizeof(cl_mem);
         mem = (cl_mem)SCM_SMOB_DATA(data);
-        p = &mem;
+        p = (size_t *)&mem;
     }
 
     CL_CHECK( clSetKernelArg(k, n, s, p) );
