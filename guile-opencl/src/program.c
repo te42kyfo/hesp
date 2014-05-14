@@ -40,6 +40,7 @@ SCM_DEFINE (scm_build_cl_program, "build-cl-program", 3, 0, 0,
     cl_program   p = scm_to_cl_program_here(program);
     size_t       n = scm_to_size_t(scm_length(devices));
     cl_device_id d[n];
+    scm_dynwind_begin(0);
     char        *o = scm_to_locale_string(options);
     SCM rest = devices;
     for(size_t i = 0; i < n; ++i) {
@@ -47,7 +48,9 @@ SCM_DEFINE (scm_build_cl_program, "build-cl-program", 3, 0, 0,
         rest     = SCM_CDR(rest);
         d[i]     = scm_to_cl_device_id_here(e);
     }
-    CL_CHECK( clBuildProgram(p, n, d, o, NULL, NULL) ); // TODO add callback
+    CL_CHECK( clBuildProgram(p, n, d, o, NULL, NULL) ); // TODO add callback?
+    scm_dynwind_free(o);
+    scm_dynwind_end();
     return program;
 }
 

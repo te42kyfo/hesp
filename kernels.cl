@@ -42,7 +42,7 @@ __kernel void update_velocities( const unsigned int N,
 		real sigma6 = sigma*sigma*sigma;
 		sigma6 = sigma6*sigma6;
 
-		real factor = 
+		real factor =
 			24.0*epsilon*invsqlength *
 			sigma6*invsqlength*invsqlength*invsqlength*
 			(2.0*sigma6*invsqlength*invsqlength*invsqlength-1);
