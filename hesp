@@ -80,10 +80,10 @@
     (let ((update-positions-kernel  (make-cl-kernel program "update_positions"))
           (update-velocities-kernel (make-cl-kernel program "update_velocities")))
       (let* ((param-file (cadr args))
-             (N     32)
-             (dt    0.1)
+             (N     2)
+             (dt    0.01)
              (epsilon    1)
-             (sigma    0.002)
+             (sigma    0.25)
              (px     (make-realvector N 0.0))
              (py     (make-realvector N 0.0))
              (pz     (make-realvector N 0.0))
@@ -161,7 +161,7 @@
         (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
         (do ((i 0 (1+ i)))
-            (( >= i 10 ))
+            (( >= i 1000 ))
           (enqueue-cl-kernel queue update-velocities-kernel
                              (list 0)
                              (list N)
@@ -170,15 +170,20 @@
                              (list 0)
                              (list N)
                              (list N))
-          (cl-finish queue))
+
         (enqueue-read-cl-buffer queue px-dev 0 px)
         (enqueue-read-cl-buffer queue py-dev 0 py)
         (enqueue-read-cl-buffer queue pz-dev 0 pz)
         (enqueue-read-cl-buffer queue vx-dev 0 vx)
         (enqueue-read-cl-buffer queue vy-dev 0 vy)
         (enqueue-read-cl-buffer queue vz-dev 0 vz)
+        (enqueue-read-cl-buffer queue fx-dev 0 fx)
+        (enqueue-read-cl-buffer queue fy-dev 0 fy)
+        (enqueue-read-cl-buffer queue fz-dev 0 fz)
+
         (cl-finish queue)
-        (ascii-write N m px py pz vx vy vz #t)))))
+        (ascii-write N m px py pz fx fy fz #t))
+))))
 
 
 
