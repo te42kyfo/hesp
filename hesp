@@ -40,35 +40,46 @@
     (newline)
     selection))
 
-(define scale-src "
-__kernel void scale(__global float* data, float scalar) {
-    int idx = get_global_id(0);
-    data[idx] = data[idx] * scalar;
-}")
+(define make-realvector make-f32vector)
+(define typedef-real "typedef float real;")
+
+(define scale-src
+  (string-concatenate
+   (list typedef-real
+         (with-input-from-file
+             "scale-kernel.cl" (lambda () (read-string))))))
 
 (define (main args)
-  (let* ((platform (hesp-select (get-cl-platforms) "platform"))
-         (device   (hesp-select (get-cl-devices platform) "device"))
-         (context  (make-cl-context device))
-         (queue    (make-cl-queue context device))
-         (program  (build-cl-program
-                    (string->cl-program context scale-src)
-                    (list device)
-                    "-cl-fast-relaxed-math"))
-         (scale-kernel (make-cl-kernel program "scale")))
-    (let* ((N     10)
-           (A     (make-f32vector N 42.0))
-           (A-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                   (* N (sizeof float)))))
-      (enqueue-write-cl-buffer queue A-dev 0 A)
-      (cl-finish queue)
-      (set-cl-kernel-arg scale-kernel 0 A-dev)
-      (set-cl-kernel-arg scale-kernel 1 (make-f32vector 1 2.0))
-      (enqueue-cl-kernel queue scale-kernel
-                         (list 0)
-                         (list N)
-                         (list 10))
-      (enqueue-read-cl-buffer queue A-dev 0 A)
-      (cl-finish queue)
-      (format #t "~a\n" A)
-      (format #t "all good!\n"))))
+  (catch #t
+    (lambda ()
+      (if (= 1 (length args))
+          (throw 'wrong-number-of-args "main" "please specify a parameter file!" #f #f))
+      (let* ((platform (hesp-select (get-cl-platforms) "platform"))
+             (device   (hesp-select (get-cl-devices platform) "device"))
+             (context  (make-cl-context device))
+             (queue    (make-cl-queue context device))
+             (program  (build-cl-program
+                        (string->cl-program context scale-src)
+                        (list device)
+                        "-cl-fast-relaxed-math"))
+             (scale-kernel (make-cl-kernel program "scale")))
+        (let* ((param-file (cadr args))
+               (N     10)
+               (A     (make-realvector N 42.0))
+               (A-dev (make-cl-buffer context CL_MEM_READ_WRITE
+                                      (* N (sizeof float)))))
+          (enqueue-write-cl-buffer queue A-dev 0 A)
+          (cl-finish queue)
+          (set-cl-kernel-arg scale-kernel 0 A-dev)
+          (set-cl-kernel-arg scale-kernel 1 (make-realvector 1 2.0))
+          (enqueue-cl-kernel queue scale-kernel
+                             (list 0)
+                             (list N)
+                             (list 10))
+          (enqueue-read-cl-buffer queue A-dev 0 A)
+          (cl-finish queue)
+          (format #t "~a\n" A)
+          (format #t "all good!\n"))))
+    ; generic exception handler
+    (lambda (key . args)
+      (format #t "~a in ~a: ~a\n" key (car args) (cadr args)))))

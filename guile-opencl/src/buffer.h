@@ -1,6 +1,7 @@
 /* Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later */
 #pragma once
 #include <libguile.h>
+#include <CL/cl.h>
 
 /* cl_mem - OpenCL memory management */
 SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM bytevector);
