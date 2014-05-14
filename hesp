@@ -5,7 +5,6 @@
 (use-modules (ice-9 pretty-print)
              (ice-9 format)
              (ice-9 rdelim)
-             (ice-9 iconv)
              (ice-9 binary-ports)
              (ice-9 receive)
              (rnrs bytevectors)
@@ -14,6 +13,15 @@
 (load-extension
  (string-concatenate
   (list (getcwd) "/guile-opencl/lib/libguile-opencl.so")) "init_guile_opencl")
+
+(define read-string
+  (lambda ()
+    (let lp ((string "")
+	     (line (read-line)))
+      (if (eof-object? line)
+	  string
+	  (lp (string-append string line)
+	      (read-line))))))
 
 ; output with exactly the formatting of the reference output
 (define (hesp-print obj)
