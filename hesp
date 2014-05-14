@@ -8,6 +8,7 @@
              (ice-9 binary-ports)
              (ice-9 receive)
              (rnrs bytevectors)
+             (rnrs base)
              (system foreign))
 
 (load-extension
@@ -42,26 +43,26 @@
 
 (define (vtk-write N m px py pz vx vy vz port)
   (format port "# vtk DataFile Version 4.0~%")
-  (format port "hesp visualisation file~%")
+  (format port "hesp visualization file~%")
   (format port "ASCII~%")
   (format port "DATASET UNSTRUCTURED_GRID~%")
   (format port "POINTS ~d double~%" N)
   (let ((buffers (list px py pz)))
     (do ((i 0 (1+ i)))
         ((>= i N))
-      (format port "~{~f ~}~%"
+      (format port "~{~,6f~}~%"
               (map (lambda (vec)
                      (realvector-ref vec i))
                    buffers))))
   (format port "CELLS 0 0~%")
-  (format port "CELL TYPES 0~%")
+  (format port "CELL_TYPES 0~%")
   (format port "POINT_DATA ~d~%" N)
   (format port "SCALARS m double~%" N)
   (format port "LOOKUP_TABLE default~%" N)
   (let ((buffers (list m)))
     (do ((i 0 (1+ i)))
         ((>= i N))
-      (format port "~{~f ~}~%"
+      (format port "~{~,6f ~}~%"
               (map (lambda (vec)
                      (realvector-ref vec i))
                    buffers))))
@@ -69,7 +70,7 @@
   (let ((buffers (list vx vy vz)))
     (do ((i 0 (1+ i)))
         ((>= i N))
-      (format port "~{~f ~}~%"
+      (format port "~{~,6f ~}~%"
               (map (lambda (vec)
                      (realvector-ref vec i))
                    buffers)))))
@@ -113,7 +114,7 @@
          (build-log (cl-program-build-info program device CL_PROGRAM_BUILD_LOG)))
     (format #t "=== build-log ===\n~a\n== end of build-log ===\n\n" build-log)
     (let ((update-positions-kernel  (make-cl-kernel program "update_positions"))
-		  (update-velocities-kernel (make-cl-kernel program "update_velocities"))
+          (update-velocities-kernel (make-cl-kernel program "update_velocities"))
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
                          (let lp ((alist (list))
@@ -220,31 +221,61 @@
           (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
           (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
-        (do ((i 0 (1+ i)))
-            (( >= i 1000 ))
-          (enqueue-cl-kernel queue update-velocities-kernel
-                             (list 0)
-                             (list N)
-                             (list N))
-          (enqueue-cl-kernel queue update-positions-kernel
-                             (list 0)
-                             (list N)
-                             (list N))
+          (do ((i 0 (1+ i)))
+              (( >= i (/ time_end timestep_length)))
+            (if (= 0 (mod i vtk_out_freq))
+                (begin
+                  (enqueue-read-cl-buffer queue px-dev 0 px)
+                  (enqueue-read-cl-buffer queue py-dev 0 py)
+                  (enqueue-read-cl-buffer queue pz-dev 0 pz)
+                  (enqueue-read-cl-buffer queue vx-dev 0 vx)
+                  (enqueue-read-cl-buffer queue vy-dev 0 vy)
+                  (enqueue-read-cl-buffer queue vz-dev 0 vz)
+                  (enqueue-read-cl-buffer queue fx-dev 0 fx)
+                  (enqueue-read-cl-buffer queue fy-dev 0 fy)
+                  (enqueue-read-cl-buffer queue fz-dev 0 fz)
+                  (cl-finish queue)
+                  (vtk-write N m px py pz vx vy vz (open-output-file
+                                                    (string-append
+                                                     vtk_out_name_base
+                                                     (number->string vtk_out_current)
+                                                     ".vtk")))
+                  (set! vtk_out_current (1+ vtk_out_current))))
+            (if (= 0 (mod i part_out_freq))
+                (begin
+                  (enqueue-read-cl-buffer queue px-dev 0 px)
+                  (enqueue-read-cl-buffer queue py-dev 0 py)
+                  (enqueue-read-cl-buffer queue pz-dev 0 pz)
+                  (enqueue-read-cl-buffer queue vx-dev 0 vx)
+                  (enqueue-read-cl-buffer queue vy-dev 0 vy)
+                  (enqueue-read-cl-buffer queue vz-dev 0 vz)
+                  (enqueue-read-cl-buffer queue fx-dev 0 fx)
+                  (enqueue-read-cl-buffer queue fy-dev 0 fy)
+                  (enqueue-read-cl-buffer queue fz-dev 0 fz)
+                  (cl-finish queue)
+                  (ascii-write N m px py pz vx vy vz (open-output-file
+                                                      (string-append
+                                                       part_out_name_base
+                                                       (number->string part_out_current)
+                                                       ".out")))
+                  (set! part_out_current (1+ part_out_current))))
+            (enqueue-cl-kernel queue update-velocities-kernel
+                               (list 0)
+                               (list N)
+                               (list N))
+            (enqueue-cl-kernel queue update-positions-kernel
+                               (list 0)
+                               (list N)
+                               (list N))
 
-        (enqueue-read-cl-buffer queue px-dev 0 px)
-        (enqueue-read-cl-buffer queue py-dev 0 py)
-        (enqueue-read-cl-buffer queue pz-dev 0 pz)
-        (enqueue-read-cl-buffer queue vx-dev 0 vx)
-        (enqueue-read-cl-buffer queue vy-dev 0 vy)
-        (enqueue-read-cl-buffer queue vz-dev 0 vz)
-        (enqueue-read-cl-buffer queue fx-dev 0 fx)
-        (enqueue-read-cl-buffer queue fy-dev 0 fy)
-        (enqueue-read-cl-buffer queue fz-dev 0 fz)
-
-        (cl-finish queue)
-        (ascii-write N m px py pz vx vy vz #t))
-
-		(ascii-write N m px py pz vx vy vz
-					 (open-output-file
-					  (string-append part_out_name_base "FINAL" ".out"))))))))
+            (enqueue-read-cl-buffer queue px-dev 0 px)
+            (enqueue-read-cl-buffer queue py-dev 0 py)
+            (enqueue-read-cl-buffer queue pz-dev 0 pz)
+            (enqueue-read-cl-buffer queue vx-dev 0 vx)
+            (enqueue-read-cl-buffer queue vy-dev 0 vy)
+            (enqueue-read-cl-buffer queue vz-dev 0 vz)
+            (enqueue-read-cl-buffer queue fx-dev 0 fx)
+            (enqueue-read-cl-buffer queue fy-dev 0 fy)
+            (enqueue-read-cl-buffer queue fz-dev 0 fz)
+            (cl-finish queue)))))))
 
