@@ -80,10 +80,10 @@
 
 
 		(let* ((param-file (cadr args))
-               (N     6)
+               (N     100)
 			   (dt    0.1)
-			   (epsilon    0.1)
-			   (sigma    0.04)
+			   (epsilon    1.0)
+			   (sigma    0.2)
 
 
 			   (px     (make-f32vector N 0.0))
@@ -93,7 +93,7 @@
 			   (vy     (make-f32vector N 0.0))
 			   (vz     (make-f32vector N 0.0))
 
-			   (m      (make-f32vector N 1.0))
+			   (m      (make-f32vector N 0.00001))
 			   (fx     (make-f32vector N 0.0))
 			   (fy     (make-f32vector N 0.0))
 			   (fz     (make-f32vector N 0.0))
@@ -121,6 +121,10 @@
 		  (do ((i 0 (1+ i)))
 			  (( >= i N ))
 			(bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)) )
+
+		  (bytevector-ieee-single-native-set! m 0 100.0)
+
+
 
 		  (enqueue-write-cl-buffer queue px-dev 0 px)
 		  (enqueue-write-cl-buffer queue py-dev 0 py)
@@ -165,24 +169,26 @@
 		  (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
 
-          (format #t "~a\n" px)
+;          (format #t "~a\n" px)
 
-		  (do ((i 0 (1+ i)))
-			  (( >= i 100 ))
+;		  (do ((i 0 (1+ i)))
+;			  (( >= i 100 ))
+
 			(enqueue-cl-kernel queue update-velocities-kernel
                              (list 0)
                              (list N)
                              (list N))
- 		  (enqueue-cl-kernel queue update-positions-kernel
-                            (list 0)
-                             (list N)
-                             (list N))
+
+ ;		  (enqueue-cl-kernel queue update-positions-kernel
+ ;                           (list 0)
+ ;                            (list N)
+ ;                            (list N))
 
 
 
-		  (enqueue-read-cl-buffer queue px-dev 0 px)
+		  (enqueue-read-cl-buffer queue fx-dev 0 fx)
           (cl-finish queue)
-		  (format #t "~a\n" px) ) 
+		  (format #t "~a\n" fx) 
 
 
 
