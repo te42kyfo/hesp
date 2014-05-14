@@ -184,8 +184,10 @@
           (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
           (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
+
+
         (do ((i 0 (1+ i)))
-            (( >= i 1000 ))
+            (( >= i (/ time_end timestep_length) ))
           (enqueue-cl-kernel queue update-velocities-kernel
                              (list 0)
                              (list N)
@@ -193,7 +195,7 @@
           (enqueue-cl-kernel queue update-positions-kernel
                              (list 0)
                              (list N)
-                             (list N))
+                             (list N)) )
 
         (enqueue-read-cl-buffer queue px-dev 0 px)
         (enqueue-read-cl-buffer queue py-dev 0 py)
@@ -206,7 +208,7 @@
         (enqueue-read-cl-buffer queue fz-dev 0 fz)
 
         (cl-finish queue)
-        (ascii-write N m px py pz vx vy vz #t))
+    ;    (ascii-write N m px py pz vx vy vz #t))
 
 		(ascii-write N m px py pz vx vy vz
 					 (open-output-file
