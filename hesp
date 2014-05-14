@@ -71,6 +71,9 @@
 		(let* ((param-file (cadr args))
                (N     6)
 			   (dt    0.1)
+			   (epsilon    0.1)
+			   (sigma    0.1)
+
 			   (px     (make-f32vector N 0.0))
 			   (py     (make-f32vector N 0.0))
 			   (pz     (make-f32vector N 0.0))
@@ -136,24 +139,24 @@
 
 		  (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
 		  (set-cl-kernel-arg update-velocities-kernel 1 (make-f32vector 1 dt) )
-		  (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 episolon) )
+		  (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 epsilon) )
 		  (set-cl-kernel-arg update-velocities-kernel 3 (make-f32vector 1 sigma) )
 		  (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 5 px-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 6 py-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 7 pz-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 8 vx-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 9 vx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 9 vy-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 10 vz-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 11 fx-dev)
-		  (set-cl-kernel-arg update-velocities-kernel 12 fx-dev)
+		  (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
 		  (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
 
           (format #t "~a\n" px)
 
  		  (enqueue-cl-kernel queue update-positions-kernel
-                             (list 0)
+                            (list 0)
                              (list N)
                              (list N))
 		  (enqueue-cl-kernel queue update-velocities-kernel
@@ -164,6 +167,8 @@
 		  (enqueue-read-cl-buffer queue px-dev 0 px)
           (cl-finish queue)
 		  (format #t "~a\n" px)
+
+
 
 
 
