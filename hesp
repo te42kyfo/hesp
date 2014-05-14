@@ -113,7 +113,7 @@
          (build-log (cl-program-build-info program device CL_PROGRAM_BUILD_LOG)))
     (format #t "=== build-log ===\n~a\n== end of build-log ===\n\n" build-log)
     (let ((update-positions-kernel  (make-cl-kernel program "update_positions"))
-          (update-velocities-kernel (make-cl-kernel program "update_velocities"))
+		  (update-velocities-kernel (make-cl-kernel program "update_velocities"))
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
                          (let lp ((alist (list))
@@ -141,7 +141,6 @@
             (part_out_current 0))
         (let* ((port (open-input-file part_input_file))
                (N     (string->number (read-line port)))
-               (dt     0.1)
                (px     (make-realvector N 0.0))
                (py     (make-realvector N 0.0))
                (pz     (make-realvector N 0.0))
@@ -194,20 +193,20 @@
           (cl-finish queue)
 
           (set-cl-kernel-arg update-positions-kernel 0 (make-u32vector 1 N) )
-          (set-cl-kernel-arg update-positions-kernel 1 (make-realvector 1 dt) )
+          (set-cl-kernel-arg update-positions-kernel 1 (make-realvector 1 timestep_length) )
           (set-cl-kernel-arg update-positions-kernel 2 m-dev)
           (set-cl-kernel-arg update-positions-kernel 3 px-dev)
           (set-cl-kernel-arg update-positions-kernel 4 py-dev)
           (set-cl-kernel-arg update-positions-kernel 5 pz-dev)
           (set-cl-kernel-arg update-positions-kernel 6 vx-dev)
-          (set-cl-kernel-arg update-positions-kernel 7 vx-dev)
+          (set-cl-kernel-arg update-positions-kernel 7 vy-dev)
           (set-cl-kernel-arg update-positions-kernel 8 vz-dev)
           (set-cl-kernel-arg update-positions-kernel 9 fx-dev)
-          (set-cl-kernel-arg update-positions-kernel 10 fx-dev)
+          (set-cl-kernel-arg update-positions-kernel 10 fy-dev)
           (set-cl-kernel-arg update-positions-kernel 11 fz-dev)
 
           (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
-          (set-cl-kernel-arg update-velocities-kernel 1 (make-realvector 1 dt) )
+          (set-cl-kernel-arg update-velocities-kernel 1 (make-realvector 1 timestep_length) )
           (set-cl-kernel-arg update-velocities-kernel 2 (make-realvector 1 epsilon) )
           (set-cl-kernel-arg update-velocities-kernel 3 (make-realvector 1 sigma) )
           (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
@@ -221,21 +220,31 @@
           (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
           (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
-          (do ((i 0 (1+ i)))
-              (( >= i 100 ))
-            (enqueue-cl-kernel queue update-positions-kernel
-                               (list 0)
-                               (list N)
-                               (list N))
-            (cl-finish queue))
-          (enqueue-read-cl-buffer queue px-dev 0 m)
-          (enqueue-read-cl-buffer queue px-dev 0 px)
-          (enqueue-read-cl-buffer queue py-dev 0 py)
-          (enqueue-read-cl-buffer queue pz-dev 0 pz)
-          (enqueue-read-cl-buffer queue pz-dev 0 vx)
-          (enqueue-read-cl-buffer queue pz-dev 0 vy)
-          (enqueue-read-cl-buffer queue pz-dev 0 vz)
-          (cl-finish queue)
-          (ascii-write N m px py pz vx vy vz
-                       (open-output-file
-                        (string-append part_out_name_base "FINAL" ".out"))))))))
+        (do ((i 0 (1+ i)))
+            (( >= i 1000 ))
+          (enqueue-cl-kernel queue update-velocities-kernel
+                             (list 0)
+                             (list N)
+                             (list N))
+          (enqueue-cl-kernel queue update-positions-kernel
+                             (list 0)
+                             (list N)
+                             (list N))
+
+        (enqueue-read-cl-buffer queue px-dev 0 px)
+        (enqueue-read-cl-buffer queue py-dev 0 py)
+        (enqueue-read-cl-buffer queue pz-dev 0 pz)
+        (enqueue-read-cl-buffer queue vx-dev 0 vx)
+        (enqueue-read-cl-buffer queue vy-dev 0 vy)
+        (enqueue-read-cl-buffer queue vz-dev 0 vz)
+        (enqueue-read-cl-buffer queue fx-dev 0 fx)
+        (enqueue-read-cl-buffer queue fy-dev 0 fy)
+        (enqueue-read-cl-buffer queue fz-dev 0 fz)
+
+        (cl-finish queue)
+        (ascii-write N m px py pz vx vy vz #t))
+
+		(ascii-write N m px py pz vx vy vz
+					 (open-output-file
+					  (string-append part_out_name_base "FINAL" ".out"))))))))
+
