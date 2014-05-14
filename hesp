@@ -40,7 +40,7 @@
     (newline)
     selection))
 
-<<<<<<< HEAD
+
 (define make-realvector make-f32vector)
 (define typedef-real "typedef float real;")
 
@@ -69,93 +69,61 @@
              (force-kernel (make-cl-kernel program "force")))
         (let* ((param-file (cadr args))
                (N     10)
-               (A     (make-realvector N 42.0))
-               (A-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                      (* N (sizeof float)))))
-          (enqueue-write-cl-buffer queue A-dev 0 A)
+			   (px     (make-f32vector N 0.0))
+			   (py     (make-f32vector N 0.0))
+			   (pz     (make-f32vector N 0.0))
+			   (m      (make-f32vector N 1.0))
+			   (fx     (make-f32vector N 0.0))
+			   (fy     (make-f32vector N 0.0))
+			   (fz     (make-f32vector N 0.0))
+			   (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (pz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (m-dev  (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (fx-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float))))
+			   (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
+									   (* N (sizeof float)))) )
+		  (do ((i 0 (1+ i)))
+			  (( >= i N ))
+			(bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)) )
+
+		  (enqueue-write-cl-buffer queue px-dev 0 px)
+		  (enqueue-write-cl-buffer queue py-dev 0 py)
+		  (enqueue-write-cl-buffer queue pz-dev 0 pz)
+		  (enqueue-write-cl-buffer queue m-dev 0 m)
+		  (enqueue-write-cl-buffer queue fx-dev 0 fx)
+		  (enqueue-write-cl-buffer queue fy-dev 0 fy)
+		  (enqueue-write-cl-buffer queue fz-dev 0 fz)
+
+
           (cl-finish queue)
-          (set-cl-kernel-arg scale-kernel 0 A-dev)
-          (set-cl-kernel-arg scale-kernel 1 (make-realvector 1 2.0))
-          (enqueue-cl-kernel queue scale-kernel
+
+		  (set-cl-kernel-arg force-kernel 0 (make-u32vector 1 N) )
+		  (set-cl-kernel-arg force-kernel 1 m-dev)
+		  (set-cl-kernel-arg force-kernel 2 px-dev)
+		  (set-cl-kernel-arg force-kernel 3 py-dev)
+		  (set-cl-kernel-arg force-kernel 4 pz-dev)
+		  (set-cl-kernel-arg force-kernel 5 fx-dev)
+		  (set-cl-kernel-arg force-kernel 6 fx-dev)
+		  (set-cl-kernel-arg force-kernel 7 fz-dev)
+
+          (enqueue-cl-kernel queue force-kernel
                              (list 0)
                              (list N)
                              (list 10))
-          (enqueue-read-cl-buffer queue A-dev 0 A)
+		  
+		  (enqueue-read-cl-buffer queue fx-dev 0 fx)
           (cl-finish queue)
-          (format #t "~a\n" A)
+          (format #t "~a\n" fx)
           (format #t "all good!\n"))))
     ; generic exception handler
     (lambda (key . args)
       (format #t "~a in ~a: ~a\n" key (car args) (cadr args)))))
-#!=======
-  (let* ((platform (hesp-select (get-cl-platforms) "platform"))
-         (device   (hesp-select (get-cl-devices platform) "device"))
-         (context  (make-cl-context device))
-         (queue    (make-cl-queue context device))
-         (program  (build-cl-program
-                    (string->cl-program context force-src)
-                    (list device)
-                    "-cl-fast-relaxed-math"))
-         (force-kernel (make-cl-kernel program "force")))
 
-    (let* ((N     10)
-           (px     (make-f32vector N 0.0))
-		   (py     (make-f32vector N 0.0))
-		   (pz     (make-f32vector N 0.0))
-		   (m      (make-f32vector N 1.0))
-		   (fx     (make-f32vector N 0.0))
-		   (fy     (make-f32vector N 0.0))
-		   (fz     (make-f32vector N 0.0))
-
-           (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (pz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (m-dev  (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (fx-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float))))
-		   (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-								   (* N (sizeof float)))) )
-
-	  (do ((i 0 (1+ i)))
-		  (( >= i N ))
-		(bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)) )
-
-;	  (bytevector-ieee-single-native-set! px (* 5 4) 1000.0)
-
-      (enqueue-write-cl-buffer queue px-dev 0 px)
-      (enqueue-write-cl-buffer queue py-dev 0 py)
-      (enqueue-write-cl-buffer queue pz-dev 0 pz)
-	  (enqueue-write-cl-buffer queue m-dev 0 m)
-	  (enqueue-write-cl-buffer queue fx-dev 0 fx)
-      (enqueue-write-cl-buffer queue fy-dev 0 fy)
-      (enqueue-write-cl-buffer queue fz-dev 0 fz)
-
-      (cl-finish queue)
-      (set-cl-kernel-arg force-kernel 0 (make-u32vector 1 N) )
-      (set-cl-kernel-arg force-kernel 1 m-dev)
-      (set-cl-kernel-arg force-kernel 2 px-dev)
-      (set-cl-kernel-arg force-kernel 3 py-dev)
-      (set-cl-kernel-arg force-kernel 4 pz-dev)
-      (set-cl-kernel-arg force-kernel 5 fx-dev)
-      (set-cl-kernel-arg force-kernel 6 fx-dev)
-      (set-cl-kernel-arg force-kernel 7 fz-dev)
-
-
-      (enqueue-cl-kernel queue force-kernel
-                         (list 0)
-                         (list N)
-                         (list 10))
-      (enqueue-read-cl-buffer queue fx-dev 0 fx)
-      (cl-finish queue)
-
-    (format #t "~a\n" fx)
-	(format #t "~a\n" px)
-	(format #t "all good!\n"))))
->>>>>>> domi
-!#
