@@ -40,9 +40,23 @@
     (newline)
     selection))
 
+(define (ascii-write N m px py pz vx vy vz port)
+  (format port "~d~%" N)
+  (let ((buffers (list m px py pz vx vy vz)))
+    (do ((i 0 (1+ i)))
+        ((>= i N))
+      (format port "~{~6,4@f ~}~%"
+              (map (lambda (vec)
+                     (realvector-ref vec i))
+                   buffers)))))
+
+;; these definitions allow both float and double
 (define real float)
 (define make-realvector make-f32vector)
+(define realvector->list f32vector->list)
 (define typedef-real "typedef float real;\n")
+(define realvector-set! f32vector-set!)
+(define realvector-ref f32vector-ref)
 
 (define kernels-src
   (string-concatenate
@@ -51,7 +65,7 @@
 
 (define (main args)
   (if (= 1 (length args))
-      (error  "please specify a parameter file!" 'main))
+      (error  "please specify a parameter file!"))
   (let* ((platform (hesp-select (get-cl-platforms) "platform"))
          (device   (hesp-select (get-cl-devices platform) "device"))
          (context  (make-cl-context device))
@@ -69,17 +83,17 @@
              (dt    0.1)
              (epsilon    0.1)
              (sigma    0.04)
-             (px     (make-f32vector N 0.0))
-             (py     (make-f32vector N 0.0))
-             (pz     (make-f32vector N 0.0))
-             (vx     (make-f32vector N 0.0))
-             (vy     (make-f32vector N 0.0))
-             (vz     (make-f32vector N 0.0))
+             (px     (make-realvector N 0.0))
+             (py     (make-realvector N 0.0))
+             (pz     (make-realvector N 0.0))
+             (vx     (make-realvector N 0.0))
+             (vy     (make-realvector N 0.0))
+             (vz     (make-realvector N 0.0))
 
-             (m      (make-f32vector N 1.0))
-             (fx     (make-f32vector N 0.0))
-             (fy     (make-f32vector N 0.0))
-             (fz     (make-f32vector N 0.0))
+             (m      (make-realvector N 1.0))
+             (fx     (make-realvector N 0.0))
+             (fy     (make-realvector N 0.0))
+             (fz     (make-realvector N 0.0))
              (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
                                      (* N (sizeof float))))
              (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
@@ -102,7 +116,7 @@
                                      (* N (sizeof float)))))
         (do ((i 0 (1+ i)))
             (( >= i N ))
-          (bytevector-ieee-single-native-set! px (* i (sizeof float)) (/ i N)))
+          (realvector-set! px i (/ i N)))
 
         (enqueue-write-cl-buffer queue px-dev 0 px)
         (enqueue-write-cl-buffer queue py-dev 0 py)
@@ -118,7 +132,7 @@
         (cl-finish queue)
 
         (set-cl-kernel-arg update-positions-kernel 0 (make-u32vector 1 N) )
-        (set-cl-kernel-arg update-positions-kernel 1 (make-f32vector 1 dt) )
+        (set-cl-kernel-arg update-positions-kernel 1 (make-realvector 1 dt) )
         (set-cl-kernel-arg update-positions-kernel 2 m-dev)
         (set-cl-kernel-arg update-positions-kernel 3 px-dev)
         (set-cl-kernel-arg update-positions-kernel 4 py-dev)
@@ -131,9 +145,9 @@
         (set-cl-kernel-arg update-positions-kernel 11 fz-dev)
 
         (set-cl-kernel-arg update-velocities-kernel 0 (make-u32vector 1 N) )
-        (set-cl-kernel-arg update-velocities-kernel 1 (make-f32vector 1 dt) )
-        (set-cl-kernel-arg update-velocities-kernel 2 (make-f32vector 1 epsilon) )
-        (set-cl-kernel-arg update-velocities-kernel 3 (make-f32vector 1 sigma) )
+        (set-cl-kernel-arg update-velocities-kernel 1 (make-realvector 1 dt) )
+        (set-cl-kernel-arg update-velocities-kernel 2 (make-realvector 1 epsilon) )
+        (set-cl-kernel-arg update-velocities-kernel 3 (make-realvector 1 sigma) )
         (set-cl-kernel-arg update-velocities-kernel 4 m-dev)
         (set-cl-kernel-arg update-velocities-kernel 5 px-dev)
         (set-cl-kernel-arg update-velocities-kernel 6 py-dev)
@@ -145,8 +159,6 @@
         (set-cl-kernel-arg update-velocities-kernel 12 fy-dev)
         (set-cl-kernel-arg update-velocities-kernel 13 fz-dev)
 
-        (format #t "~a\n" px)
-
         (do ((i 0 (1+ i)))
             (( >= i 100 ))
           (enqueue-cl-kernel queue update-velocities-kernel
@@ -157,9 +169,14 @@
                              (list 0)
                              (list N)
                              (list N))
+          (cl-finish queue))
+          (enqueue-read-cl-buffer queue px-dev 0 m)
           (enqueue-read-cl-buffer queue px-dev 0 px)
+          (enqueue-read-cl-buffer queue py-dev 0 py)
+          (enqueue-read-cl-buffer queue pz-dev 0 pz)
+          (enqueue-read-cl-buffer queue pz-dev 0 vx)
+          (enqueue-read-cl-buffer queue pz-dev 0 vy)
+          (enqueue-read-cl-buffer queue pz-dev 0 vz)
           (cl-finish queue)
-                                        ;(format #t "~a\n" px)
-          )
-        (format #t "all good!\n")))))
+          (ascii-write N m px py pz vx vy vz #t)))))
 
