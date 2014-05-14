@@ -20,7 +20,7 @@ if test "x$guile_snarf" = "xnot-found"; then
 fi
 GUILE_SITE_DIR
 
-AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_FILES([
  Makefile
  src/Makefile

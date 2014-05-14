@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libguile_opencl.la
+lib_LTLIBRARIES = libguile-opencl.la
 libguile_opencl_la_CFLAGS = $(GUILE_CFLAGS)
-libguile_opencl_la_LDFLAGS = -module  $(GUILE_LDFLAGS) $(AM_CFLAGS)
+libguile_opencl_la_LDFLAGS = -module  $(GUILE_LDFLAGS) $(AM_CFLAGS) -lOpenCL
 
 DOT_X_FILES = \
 buffer.x \
@@ -21,25 +21,52 @@ program.x \
 queue.x \
 sampler.x
 
-libguile_opencl_la_SOURCES = \
+CFILES = \
+buffer.c \
+constants.c \
+context.c \
+conversion.c \
+device.c \
+error.c \
+event.c \
+image.c \
+info.c \
+init.c \
+kernel.c \
+platform.c \
+predicates.c \
+print.c \
+program.c \
+queue.c \
+sampler.c
+
+HFILES = \
+buffer.h \
+config.h \
+constants.h \
+context.h \
+conversion.h \
+device.h \
+error.h \
+event.h \
 guile-opencl.h \
-buffer.c buffer.h \
-constants.c constants.h \
-context.c context.h \
-conversion.c conversion.h \
-device.c device.h \
-error.c error.h \
-event.c event.h \
-image.c image.h \
-info.c info.h \
-init.c init.h \
-kernel.c kernel.h \
-platform.c platform.h \
-predicates.c predicates.h \
-print.c print.h \
-program.c program.h \
-queue.c queue.h \
-sampler.c sampler.h
+image.h \
+info.h \
+init.h \
+kernel.h \
+platform.h \
+predicates.h \
+print.h \
+program.h \
+queue.h \
+sampler.h
+
+libguile_opencl_la_SOURCES = $(CFILES) $(HFILES)
+
+include_HEADERS = guile-opencl.h
+
+headersdir = $(includedir)/libguile-opencl
+dist_headers_HEADERS = $(HFILES)
 
 BUILT_SOURCES = $(DOT_X_FILES)
 CLEANFILES    = $(DOT_X_FILES)

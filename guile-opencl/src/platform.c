@@ -4,7 +4,7 @@
 #include "error.h"
 #include "conversion.h"
 
-SCM_DEFINE (scm_get_cl_platforms, "cl-get-platforms", 0, 0, 0,
+SCM_DEFINE (scm_get_cl_platforms, "get-cl-platforms", 0, 0, 0,
             (),
             "Return a list of all avilable OpenCL platforms.") {
     cl_uint         num_platforms;

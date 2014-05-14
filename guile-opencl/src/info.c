@@ -5,7 +5,7 @@
 #include "conversion.h"
 #include "error.h"
 
-SCM_DEFINE (scm_get_cl_platform_info, "cl-platform-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_platform_info, "cl-platform-info", 2, 0, 0,
             (SCM platform, SCM param_name),
             "Return information of the OpenCl platform @var{platform}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -18,7 +18,7 @@ SCM_DEFINE (scm_get_cl_platform_info, "cl-platform-info", 2, 0, 0,
     return scm_from_locale_stringn(buffer, buf_len - 1);
 }
 
-SCM_DEFINE (scm_get_cl_device_info, "cl-device-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_device_info, "cl-device-info", 2, 0, 0,
             (SCM device, SCM param_name),
             "Return information of the OpenCl device @var{device}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -94,7 +94,7 @@ SCM_DEFINE (scm_get_cl_device_info, "cl-device-info", 2, 0, 0,
     }
     case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
         SCM dim_key   = scm_from_cl_uint(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS);
-        SCM dim       = scm_get_cl_device_info(device, dim_key);
+        SCM dim       = scm_cl_device_info(device, dim_key);
         cl_uint imax  = scm_to_uint(dim);
         SCM ret       = SCM_EOL;
         size_t *sizes = (size_t*)buffer;
@@ -174,7 +174,7 @@ SCM_DEFINE (scm_get_cl_device_info, "cl-device-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_mem_info, "cl-mem-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_mem_info, "cl-mem-info", 2, 0, 0,
             (SCM mem, SCM param_name),
             "Return information of the OpenCl memory object @var{mem}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -196,7 +196,7 @@ SCM_DEFINE (scm_get_cl_mem_info, "cl-mem-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_context_info, "cl-context-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_context_info, "cl-context-info", 2, 0, 0,
             (SCM context, SCM param_name),
             "Return information of the OpenCl context @var{context}"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -216,7 +216,7 @@ SCM_DEFINE (scm_get_cl_context_info, "cl-context-info", 2, 0, 0,
         SCM ret = SCM_EOL;
         cl_device_id *devices = (cl_device_id*)buffer;
         SCM num_devices_key = scm_from_cl_uint(CL_CONTEXT_NUM_DEVICES);
-        SCM scm_num_devices = scm_get_cl_context_info(context, num_devices_key);
+        SCM scm_num_devices = scm_cl_context_info(context, num_devices_key);
         cl_uint num_devices = scm_to_cl_uint(scm_num_devices);
         // TODO unsafe code if device list is concurrently modified
         for(cl_uint ui = 0; ui < num_devices; ++ui) {
@@ -229,7 +229,7 @@ SCM_DEFINE (scm_get_cl_context_info, "cl-context-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_command_queue_info, "cl-command-queue-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_command_queue_info, "cl-command-queue-info", 2, 0, 0,
             (SCM command_queue, SCM param_name),
             "Return information of the OpenCl command-queue @var{command_queue}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -257,7 +257,7 @@ SCM_DEFINE (scm_get_cl_command_queue_info, "cl-command-queue-info", 2, 0, 0,
 }
 
 
-SCM_DEFINE (scm_get_cl_program_info, "cl-program-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_program_info, "cl-program-info", 2, 0, 0,
             (SCM program, SCM param_name),
             "Return information of the OpenCl program @var{program}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -278,7 +278,7 @@ SCM_DEFINE (scm_get_cl_program_info, "cl-program-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_kernel_info, "cl-kernel-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_kernel_info, "cl-kernel-info", 2, 0, 0,
             (SCM kernel, SCM param_name),
             "Return information of the OpenCl kernel @var{kernel}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -309,7 +309,7 @@ SCM_DEFINE (scm_get_cl_kernel_info, "cl-kernel-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_event_info, "cl-event-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_event_info, "cl-event-info", 2, 0, 0,
             (SCM event, SCM param_name),
             "Return information of the OpenCl event @var{event}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -330,7 +330,7 @@ SCM_DEFINE (scm_get_cl_event_info, "cl-event-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_sampler_info, "cl-sampler-info", 2, 0, 0,
+SCM_DEFINE (scm_cl_sampler_info, "cl-sampler-info", 2, 0, 0,
             (SCM sampler, SCM param_name),
             "Return information of the OpenCl sampler @var{sampler}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -356,7 +356,7 @@ SCM_DEFINE (scm_get_cl_sampler_info, "cl-sampler-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_get_cl_program_build_info, "cl-program-build-info", 3, 0, 0,
+SCM_DEFINE (scm_cl_program_build_info, "cl-program-build-info", 3, 0, 0,
             (SCM program, SCM device, SCM param_name),
             "Return information of the OpenCl program @var{program}\n"
             "built for device @var{device} specified by the OpenCL constant\n"
@@ -383,7 +383,7 @@ SCM_DEFINE (scm_get_cl_program_build_info, "cl-program-build-info", 3, 0, 0,
     return SCM_EOL;
 }
 
-SCM_DEFINE (scm_get_cl_work_group_info, "cl-work-group-info", 3, 0, 0,
+SCM_DEFINE (scm_cl_work_group_info, "cl-work-group-info", 3, 0, 0,
             (SCM kernel, SCM device, SCM param_name),
             "Return information of the OpenCl kernel @var{kernel}\n"
             "running on device @var{device} specified by the OpenCL\n"
@@ -392,7 +392,7 @@ SCM_DEFINE (scm_get_cl_work_group_info, "cl-work-group-info", 3, 0, 0,
     return SCM_EOL;
 }
 
-SCM_DEFINE (scm_get_cl_event_profiling_info, "cl-event-profiling-info", 3, 0, 0,
+SCM_DEFINE (scm_cl_event_profiling_info, "cl-event-profiling-info", 3, 0, 0,
             (SCM event, SCM param_name),
             "Return information of the OpenCl event @var{event}\n"
             "specified by the OpenCL constant @var{param_name}.") {
@@ -400,7 +400,7 @@ SCM_DEFINE (scm_get_cl_event_profiling_info, "cl-event-profiling-info", 3, 0, 0,
     return SCM_EOL;
 }
 
-SCM_DEFINE (scm_get_cl_info, "cl-info", 1, 1, 0,
+SCM_DEFINE (scm_cl_info, "cl-info", 1, 1, 0,
             (SCM smob, SCM param_name),
             "@var{smob} can by any Guile OpenCL smob. If @var{param_name}\n"
             "is omitted, return an alist of all attributes and values as\n"
@@ -410,15 +410,15 @@ SCM_DEFINE (scm_get_cl_info, "cl-info", 1, 1, 0,
     scm_t_bits tag = SCM_SMOB_FLAGS(smob);
 
     if(!SCM_UNBNDP(param_name)) {
-        if(tag == cl_platform_tag     ) return scm_get_cl_platform_info(smob, param_name);
-        if(tag == cl_device_tag       ) return scm_get_cl_device_info(smob, param_name);
-        if(tag == cl_context_tag      ) return scm_get_cl_context_info(smob, param_name);
-        if(tag == cl_command_queue_tag) return scm_get_cl_command_queue_info(smob, param_name);
-        if(tag == cl_mem_tag          ) return scm_get_cl_mem_info(smob, param_name);
-        if(tag == cl_program_tag      ) return scm_get_cl_program_info(smob, param_name);
-        if(tag == cl_kernel_tag       ) return scm_get_cl_kernel_info(smob, param_name);
-        if(tag == cl_event_tag        ) return scm_get_cl_event_info(smob, param_name);
-        if(tag == cl_sampler_tag      ) return scm_get_cl_sampler_info(smob, param_name);
+        if(tag == cl_platform_tag     ) return scm_cl_platform_info(smob, param_name);
+        if(tag == cl_device_tag       ) return scm_cl_device_info(smob, param_name);
+        if(tag == cl_context_tag      ) return scm_cl_context_info(smob, param_name);
+        if(tag == cl_command_queue_tag) return scm_cl_command_queue_info(smob, param_name);
+        if(tag == cl_mem_tag          ) return scm_cl_mem_info(smob, param_name);
+        if(tag == cl_program_tag      ) return scm_cl_program_info(smob, param_name);
+        if(tag == cl_kernel_tag       ) return scm_cl_kernel_info(smob, param_name);
+        if(tag == cl_event_tag        ) return scm_cl_event_info(smob, param_name);
+        if(tag == cl_sampler_tag      ) return scm_cl_sampler_info(smob, param_name);
         scm_wrong_type_arg_msg(__func__, SCM_ARG1, smob, "opencl smob");
         return SCM_EOL;
     }
@@ -426,8 +426,7 @@ SCM_DEFINE (scm_get_cl_info, "cl-info", 1, 1, 0,
     SCM ret = SCM_EOL;
 #define ACONS_CL_INFO(key, smob, alist)                                 \
     alist = scm_acons( scm_from_utf8_string( #key ),                    \
-                       scm_get_cl_info(smob,                            \
-                                       scm_from_cl_uint(key)),          \
+                       scm_cl_info(smob, scm_from_cl_uint(key)),        \
                        alist)
 
     if(tag == cl_platform_tag) {

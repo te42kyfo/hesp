@@ -9,21 +9,21 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
     if(tag == cl_platform_tag) {
         SCM key = SCM_CL_PLATFORM_NAME;
         scm_puts("#<cl-platform: ", port);
-        scm_display(scm_get_cl_platform_info(smob, key), port);
+        scm_display(scm_cl_platform_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }
     if(tag == cl_device_tag) {
         SCM key = SCM_CL_DEVICE_NAME;
         scm_puts("#<cl-device: ", port);
-        scm_display(scm_get_cl_device_info(smob, key), port);
+        scm_display(scm_cl_device_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }
     if(tag == cl_context_tag) {
         SCM key = SCM_CL_CONTEXT_DEVICES;
         scm_puts("#<cl-context: ", port);
-        scm_display(scm_get_cl_context_info(smob, key), port);
+        scm_display(scm_cl_context_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }

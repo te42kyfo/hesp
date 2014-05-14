@@ -32,7 +32,7 @@ SCM_DEFINE (scm_binary_to_cl_program, "binary->cl-program", 3, 0, 0,
     return SCM_EOL; // TODO
 }
 
-SCM_DEFINE (scm_build_cl_program, "cl-build-program", 3, 0, 0,
+SCM_DEFINE (scm_build_cl_program, "build-cl-program", 3, 0, 0,
             (SCM program, SCM devices, SCM options),
             "Compile the sourcecode of the OpenCL program @var{program}\n"
             "for each OpenCL device given in @var{devices}.\n"

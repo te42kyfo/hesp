@@ -5,7 +5,7 @@
 #include "error.h"
 #include "info.h"
 
-SCM_DEFINE (scm_make_cl_context, "cl-make-context", 0, 0, 1,
+SCM_DEFINE (scm_make_cl_context, "make-cl-context", 0, 0, 1,
             (SCM devices),
             "Create a new OpenCL context containing all OpenCL devices\n"
             "given in @var{devices}") {
@@ -28,8 +28,8 @@ SCM_DEFINE (scm_make_cl_context, "cl-make-context", 0, 0, 1,
     /* A platform is needed to create a context. I simply take the platform of
        the first device and rely on the OpenCL implementation to detect if
        some devices are from different platforms that the first. */
-    SCM scm_platform = scm_get_cl_device_info(SCM_CAR(devices),
-                                              scm_from_cl_uint(CL_DEVICE_PLATFORM));
+    SCM scm_platform = scm_cl_device_info(SCM_CAR(devices),
+                                          scm_from_cl_uint(CL_DEVICE_PLATFORM));
     cl_platform_id platform = scm_to_cl_platform_id_here(scm_platform);
     cl_context_properties cps[3];
     cps[0] = (cl_context_properties)CL_CONTEXT_PLATFORM;

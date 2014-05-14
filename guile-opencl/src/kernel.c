@@ -4,7 +4,7 @@
 #include "conversion.h"
 #include "error.h"
 
-SCM_DEFINE (scm_make_cl_kernel, "cl-make-kernel", 2, 0, 0,
+SCM_DEFINE (scm_make_cl_kernel, "make-cl-kernel", 2, 0, 0,
             (SCM program, SCM name),
             "Create an OpenCL kernel referring to the function named"
             "@var{name} in the OpenCL program @var{program}") {
@@ -21,7 +21,7 @@ SCM_DEFINE (scm_make_cl_kernel, "cl-make-kernel", 2, 0, 0,
     return scm_from_cl_kernel(kernel);
 }
 
-SCM_DEFINE (scm_set_cl_kernel_arg, "cl-set-kernel-arg", 3, 0, 0,
+SCM_DEFINE (scm_set_cl_kernel_arg, "set-cl-kernel-arg", 3, 0, 0,
             (SCM kernel, SCM argnum, SCM bv),
             "Set the argument @var{argnum} of the OpenCL kernel @var{kernel}\n"
             "to the value stored inside the length-one bytevector @var{bv}.") {
@@ -37,7 +37,7 @@ SCM_DEFINE (scm_set_cl_kernel_arg, "cl-set-kernel-arg", 3, 0, 0,
     return kernel;
 }
 
-SCM_DEFINE (scm_enqueue_cl_kernel, "cl-enqueue-kernel", 5, 0, 1,
+SCM_DEFINE (scm_enqueue_cl_kernel, "enqueue-cl-kernel", 5, 0, 1,
             (SCM queue, SCM kernel,
              SCM offsets, SCM global_dims, SCM local_dims,
              SCM events),

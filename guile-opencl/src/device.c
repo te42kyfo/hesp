@@ -5,7 +5,7 @@
 #include "error.h"
 #include "constants.h"
 
-SCM_DEFINE (scm_get_cl_devices, "cl-get-devices", 1, 1, 0,
+SCM_DEFINE (scm_get_cl_devices, "get-cl-devices", 1, 1, 0,
             (SCM platform, SCM flags),
             "Return a list of all avilable OpenCL devices that are\n"
             "avilable on platform \var{platform}.") {

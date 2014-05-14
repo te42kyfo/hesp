@@ -4,7 +4,7 @@
 #include "conversion.h"
 #include "error.h"
 
-SCM_DEFINE (scm_make_cl_buffer, "cl-make-buffer", 3, 1, 0,
+SCM_DEFINE (scm_make_cl_buffer, "make-cl-buffer", 3, 1, 0,
             (SCM context, SCM flags, SCM size, SCM bv),
             "Allocate an OpenCL buffer of size @var{size}.") {
     cl_context   c   = scm_to_cl_context_here(context);
@@ -27,7 +27,7 @@ SCM_DEFINE (scm_make_cl_buffer, "cl-make-buffer", 3, 1, 0,
     return scm_from_cl_mem(buffer);
 }
 
-SCM_DEFINE (scm_alias_bytevector, "cl-alias-bytevector", 3, 0, 0,
+SCM_DEFINE (scm_alias_bytevector, "alias-bytevector", 3, 0, 0,
             (SCM bv, SCM size, SCM offset),
             "Return a bytevector of size @var{size} aliasing the\n"
             "bytevector @var{bv} offset by @var{offset} bytes.\n"
@@ -47,7 +47,7 @@ SCM_DEFINE (scm_alias_bytevector, "cl-alias-bytevector", 3, 0, 0,
     return scm_pointer_to_bytevector(ptr, size, SCM_UNDEFINED, SCM_UNDEFINED);
 }
 
-SCM_DEFINE (scm_read_cl_buffer, "cl-read-buffer", 4, 0, 1,
+SCM_DEFINE (scm_enqueue_read_cl_buffer, "enqueue-read-cl-buffer", 4, 0, 1,
             (SCM queue, SCM buffer, SCM offset, SCM bv, SCM events),
             "Enqueue a device->host copy of the cl-buffer @var{buffer}\n"
             "offset by @var{offset} bytes into the bytevector @var{bv}.\n"
@@ -68,7 +68,7 @@ SCM_DEFINE (scm_read_cl_buffer, "cl-read-buffer", 4, 0, 1,
     return scm_from_cl_event(event);
 }
 
-SCM_DEFINE (scm_write_cl_buffer, "cl-write-buffer", 4, 0, 1,
+SCM_DEFINE (scm_enqueue_write_cl_buffer, "enqueue-write-cl-buffer", 4, 0, 1,
             (SCM queue, SCM buffer, SCM offset, SCM bv, SCM events),
             "Enqueue a host->device copy from the bytevector @var{bv}\n"
             "to the cl-buffer @var{buffer} offset by @var{offset} bytes.\n"
@@ -89,7 +89,7 @@ SCM_DEFINE (scm_write_cl_buffer, "cl-write-buffer", 4, 0, 1,
     return scm_from_cl_event(event);
 }
 
-SCM_DEFINE (scm_copy_cl_buffer, "cl-copy-buffer", 6, 0, 1,
+SCM_DEFINE (scm_enqueue_copy_cl_buffer, "enqueue-copy-cl-buffer", 6, 0, 1,
             (SCM queue,
              SCM src_buffer, SCM dst_buffer,
              SCM src_offset, SCM dst_offset, SCM size,
@@ -117,7 +117,7 @@ SCM_DEFINE (scm_copy_cl_buffer, "cl-copy-buffer", 6, 0, 1,
 }
 
 #ifdef CL_VERSION_1_2
-SCM_DEFINE (scm_fill_cl_buffer, "cl-fill-buffer", 5, 0, 1,
+SCM_DEFINE (scm_enqueue_fill_cl_buffer, "enqueue-fill-cl-buffer", 5, 0, 1,
             (SCM queue, SCM buffer, SCM pattern, SCM offset, SCM size, SCM events),
             "Enqueue an operation to fill \var{size} bytes of\n"
             "the buffer \var{buffer} offset by \var{offset} with repetitions\n"
@@ -139,7 +139,7 @@ SCM_DEFINE (scm_fill_cl_buffer, "cl-fill-buffer", 5, 0, 1,
 }
 #endif
 
-SCM_DEFINE (scm_map_cl_buffer, "cl-map-buffer", 5, 0, 1,
+SCM_DEFINE (scm_enqueue_map_cl_buffer, "enqueue-map-cl-buffer", 5, 0, 1,
             (SCM queue, SCM buffer, SCM flags, SCM offset, SCM size, SCM eventsx),
             "Map a part of the device memory specified by \var{buffer},\n"
             "\var{offset} and \var{size} back to host memory.\n"
@@ -169,7 +169,7 @@ SCM_DEFINE (scm_map_cl_buffer, "cl-map-buffer", 5, 0, 1,
     return scm_values(scm_list_2(bv, scm_event));
 }
 
-SCM_DEFINE (scm_unmap_mem, "cl-unmap", 3, 0, 1,
+SCM_DEFINE (scm_enqueue_unmap_cl_buffer, "enqueue-unmap-cl-buffer", 3, 0, 1,
             (SCM queue, SCM mem, SCM bv, SCM events),
             "Enqueue an unmap operation of the memory specified by\n"
             "the bytevector \var{bv}.\n"

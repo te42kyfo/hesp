@@ -7,6 +7,10 @@
              (rnrs bytevectors)
              (system foreign))
 
+(load-extension
+ (string-concatenate
+  (list (getcwd) "/guile-opencl/src/.libs/libguile-opencl.so")) "init_guile_opencl")
+
 ; output with exactly the formatting of the reference output
 (define (hesp-print obj)
   (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))
@@ -34,31 +38,32 @@
 
 (define (main args)
   ; platform setup
-  (let* ((platform (hesp-select (cl-get-platforms) "platform"))
-         (device (hesp-select (cl-get-devices platform) "device"))
-         (context (cl-make-context device))
-         (queue (cl-make-queue context device)))
+  (let* ((platform (hesp-select (get-cl-platforms) "platform"))
+         (device (hesp-select (get-cl-devices platform) "device"))
+         (context (make-cl-context device))
+         (queue (make-cl-queue context device)))
     ; now the fancy buffer copying part
     (let* ((hello (string->bytevector "Hello OpenCL!" "US-ASCII"))
            (hello-len (bytevector-length hello))
-           (hello-ptr (bytevector->pointer hello))
-           (hello-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR hello-len hello-ptr))
+           (hello-buf (make-cl-buffer context CL_MEM_USE_HOST_PTR hello-len hello))
            (bye (string->bytevector "Bye OpenCL!!!" "US-ASCII"))
            (bye-len (bytevector-length bye))
-           (bye-ptr (bytevector->pointer bye))
-           (bye-buf (cl-make-buffer context CL_MEM_USE_HOST_PTR bye-len bye-ptr))
+           (bye-buf (make-cl-buffer context CL_MEM_USE_HOST_PTR bye-len bye))
            (qmarks (make-bytevector 15 (char->integer #\?)))
            (stars (make-bytevector 15 (char->integer #\*))))
 
-      (cl-write-buffer queue hello-buf 0 hello #f)
+      (enqueue-write-cl-buffer queue hello-buf 0 hello #f)
       (cl-finish queue)
-      (cl-read-buffer  queue hello-buf 0
-                       (cl-alias-bytevector qmarks hello-len 0) #f)
+      (enqueue-read-cl-buffer  queue hello-buf 0
+                       (alias-bytevector qmarks hello-len 0) #f)
+      (cl-finish queue)
       (format #t "~a~%" (bytevector->string qmarks "US-ASCII"))
 
-      (cl-copy-buffer queue hello-buf bye-buf 0 0 (min hello-len bye-len) #f)
+      (enqueue-copy-cl-buffer queue hello-buf bye-buf 0 0 (min hello-len bye-len) #f)
       (receive (bv event)
-          (cl-map-buffer queue bye-buf CL_MAP_READ 0 bye-len #f)
+          (enqueue-map-cl-buffer queue bye-buf CL_MAP_READ 0 bye-len #f)
         (bytevector-copy! bv 0 stars 0 bye-len)
         (format #t "~a~%" (bytevector->string stars "US-ASCII"))
-        (cl-unmap queue bye-buf bv #f)))))
+        (enqueue-unmap-cl-buffer queue bye-buf bv #f)))))
+
+(main #f)
