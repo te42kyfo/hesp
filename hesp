@@ -35,8 +35,8 @@
                           list (iota len))
                 (format #t "Choose a ~a (from 0 to ~d)~%" name (1- len))
                 (list-ref list (string->number (read-line)))))))
-    (format #t "Using the following ~a:~%" name)
-    (hesp-print selection)
+    ;(format #t "Using the following ~a:~%" name)
+    ;(hesp-print selection)
     (newline)
     selection))
 
