@@ -31,8 +31,12 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
         scm_puts("#<cl-command-queue: >", port); // TODO
         return 1;
     }
-    if(tag == cl_mem_tag) {
-        scm_puts("#<cl-mem: >", port); // TODO
+    if(tag == cl_buffer_tag) {
+        scm_puts("#<cl-buffer: >", port); // TODO
+        return 1;
+    }
+    if(tag == cl_image_tag) {
+        scm_puts("#<cl-image: >", port); // TODO
         return 1;
     }
     if(tag == cl_program_tag) {

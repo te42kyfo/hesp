@@ -24,7 +24,7 @@ SCM_DEFINE (scm_make_cl_buffer, "make-cl-buffer", 3, 1, 0,
     cl_int err;
     cl_mem buffer = clCreateBuffer(c, f, s, hp, &err);
     CL_CHECK( err );
-    return scm_from_cl_mem(buffer);
+    return scm_from_cl_buffer(buffer);
 }
 
 SCM_DEFINE (scm_alias_bytevector, "alias-bytevector", 3, 0, 0,
@@ -57,7 +57,7 @@ SCM_DEFINE (scm_enqueue_read_cl_buffer, "enqueue-read-cl-buffer", 4, 0, 1,
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem           b = scm_to_cl_mem_here(buffer);
+    cl_mem           b = scm_to_cl_buffer_here(buffer);
     size_t           o = scm_to_size_t(offset);
     size_t           s = scm_c_bytevector_length(bv);
     void            *p = SCM_BYTEVECTOR_CONTENTS(bv);
@@ -78,7 +78,7 @@ SCM_DEFINE (scm_enqueue_write_cl_buffer, "enqueue-write-cl-buffer", 4, 0, 1,
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem           b = scm_to_cl_mem_here(buffer);
+    cl_mem           b = scm_to_cl_buffer_here(buffer);
     size_t           o = scm_to_size_t(offset);
     size_t           s = scm_c_bytevector_length(bv);
     void            *p = SCM_BYTEVECTOR_CONTENTS(bv);
@@ -103,8 +103,8 @@ SCM_DEFINE (scm_enqueue_copy_cl_buffer, "enqueue-copy-cl-buffer", 6, 0, 1,
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem src  = scm_to_cl_mem_here(src_buffer);
-    cl_mem dst  = scm_to_cl_mem_here(dst_buffer);
+    cl_mem src  = scm_to_cl_buffer_here(src_buffer);
+    cl_mem dst  = scm_to_cl_buffer_here(dst_buffer);
     size_t srco = scm_to_size_t(src_offset);
     size_t dsto = scm_to_size_t(dst_offset);
     size_t s    = scm_to_size_t(size);
@@ -127,7 +127,7 @@ SCM_DEFINE (scm_enqueue_fill_cl_buffer, "enqueue-fill-cl-buffer", 5, 0, 1,
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem b  = scm_to_cl_mem_here(buffer);
+    cl_mem b  = scm_to_cl_buffer_here(buffer);
     size_t ps = scm_c_bytevector_length(pattern);
     void  *p  = SCM_BYTEVECTOR_CONTENTS(pattern);
     size_t o  = scm_to_size_t(offset);
@@ -151,7 +151,7 @@ SCM_DEFINE (scm_enqueue_map_cl_buffer, "enqueue-map-cl-buffer", 5, 0, 1,
             "mapped memory and an OpenCL event detailing the state of this\n."
             "operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem       b = scm_to_cl_mem_here(buffer);
+    cl_mem       b = scm_to_cl_buffer_here(buffer);
     cl_map_flags f = scm_to_cl_ulong(flags);
     size_t       o = scm_to_size_t(offset);
     size_t       s = scm_to_size_t(size);
@@ -170,7 +170,7 @@ SCM_DEFINE (scm_enqueue_map_cl_buffer, "enqueue-map-cl-buffer", 5, 0, 1,
 }
 
 SCM_DEFINE (scm_enqueue_unmap_cl_buffer, "enqueue-unmap-cl-buffer", 3, 0, 1,
-            (SCM queue, SCM mem, SCM bv, SCM events),
+            (SCM queue, SCM buffer, SCM bv, SCM events),
             "Enqueue an unmap operation of the memory specified by\n"
             "the bytevector \var{bv}.\n"
             "\var{bv} must be a bytevector returned from a previous\n"
@@ -178,7 +178,7 @@ SCM_DEFINE (scm_enqueue_unmap_cl_buffer, "enqueue-unmap-cl-buffer", 3, 0, 1,
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.") {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
-    cl_mem m = scm_to_cl_mem_here(mem);
+    cl_mem m = scm_to_cl_buffer_here(buffer);
     SCM_ASSERT_TYPE(scm_is_bytevector(bv), bv, SCM_ARG3, __func__, "bytevector");
     void  *p = SCM_BYTEVECTOR_CONTENTS(bv);
 

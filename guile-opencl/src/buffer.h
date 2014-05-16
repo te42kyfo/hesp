@@ -3,7 +3,6 @@
 #include <libguile.h>
 #include <CL/cl.h>
 
-/* cl_mem - OpenCL memory management */
 SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM bytevector);
 
 /* return a bytevector aliasing another bytevector. I do check that the new
@@ -35,7 +34,7 @@ SCM scm_enqueue_map_cl_buffer (SCM command_queue, SCM buffer, SCM flags,
                                SCM offset, SCM size,
                                SCM event_wait_list); // -> bytevector, event
 
-SCM scm_enqueue_unmap_cl_buffer (SCM command_queue, SCM mem,
+SCM scm_enqueue_unmap_cl_buffer (SCM command_queue, SCM buffer,
                                  SCM ptr, SCM event_wait_list); // -> event
 
 void guile_opencl_init_buffer ();

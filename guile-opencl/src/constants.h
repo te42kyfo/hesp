@@ -10,11 +10,12 @@ static const scm_t_bits cl_platform_tag      =  0x0001;
 static const scm_t_bits cl_device_tag        =  0x0002;
 static const scm_t_bits cl_context_tag       =  0x0003;
 static const scm_t_bits cl_command_queue_tag =  0x0004;
-static const scm_t_bits cl_mem_tag           =  0x0005;
-static const scm_t_bits cl_program_tag       =  0x0006;
-static const scm_t_bits cl_kernel_tag        =  0x0007;
-static const scm_t_bits cl_event_tag         =  0x0008;
-static const scm_t_bits cl_sampler_tag       =  0x0009;
+static const scm_t_bits cl_buffer_tag        =  0x0005;
+static const scm_t_bits cl_image_tag         =  0x0006;
+static const scm_t_bits cl_program_tag       =  0x0007;
+static const scm_t_bits cl_kernel_tag        =  0x0008;
+static const scm_t_bits cl_event_tag         =  0x0009;
+static const scm_t_bits cl_sampler_tag       =  0x0010;
 
 SCM SCM_CL_VERSION_1_0;
 SCM SCM_CL_VERSION_1_1;

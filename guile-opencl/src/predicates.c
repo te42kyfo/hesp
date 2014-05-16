@@ -44,12 +44,20 @@ SCM_DEFINE (scm_cl_command_queue_p, "cl-command-queue?", 1, 0, 0,
     return type_p(x, cl_command_queue_tag);
 }
 
-SCM_DEFINE (scm_cl_mem_p, "cl-mem?", 1, 0, 0,
+SCM_DEFINE (scm_cl_buffer_p, "cl-buffer?", 1, 0, 0,
            (SCM x),
-            "Return @code{#t} iff @var{x} is a OpenCL mem,\n"
+            "Return @code{#t} iff @var{x} is a OpenCL buffer,\n"
             "else @code{#f}.")
 {
-    return type_p(x, cl_mem_tag);
+    return type_p(x, cl_buffer_tag);
+}
+
+SCM_DEFINE (scm_cl_image_p, "cl-image?", 1, 0, 0,
+           (SCM x),
+            "Return @code{#t} iff @var{x} is a OpenCL image,\n"
+            "else @code{#f}.")
+{
+    return type_p(x, cl_image_tag);
 }
 
 SCM_DEFINE (scm_cl_program_p, "cl-program?", 1, 0, 0,

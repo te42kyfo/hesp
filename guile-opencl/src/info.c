@@ -174,11 +174,33 @@ SCM_DEFINE (scm_cl_device_info, "cl-device-info", 2, 0, 0,
     scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
 }
 
-SCM_DEFINE (scm_cl_mem_info, "cl-mem-info", 2, 0, 0,
-            (SCM mem, SCM param_name),
-            "Return information of the OpenCl memory object @var{mem}\n"
+SCM_DEFINE (scm_cl_buffer_info, "cl-buffer-info", 2, 0, 0,
+            (SCM buffer, SCM param_name),
+            "Return information of the OpenCl buffer object @var{buffer}\n"
             "specified by the OpenCL constant @var{param_name}.") {
-    cl_mem      m  = scm_to_cl_mem_here(mem);
+    cl_mem      m  = scm_to_cl_buffer_here(buffer);
+    cl_mem_info pn = scm_to_cl_uint(param_name);
+
+    size_t buf_len;
+    CL_CHECK( clGetMemObjectInfo(m, pn, 0, NULL, &buf_len) );
+    char data[buf_len];
+    CL_CHECK( clGetMemObjectInfo(m, pn, buf_len, data, NULL) );
+
+    switch(pn) {
+    case CL_MEM_SIZE: {
+        size_t size = *(size_t*)data;
+        return scm_from_size_t(size);
+    }
+        // TODO other cases
+    }
+    scm_misc_error(__func__, "invalid param_name or not implemented", SCM_EOL);
+}
+
+SCM_DEFINE (scm_cl_image_info, "cl-image-info", 2, 0, 0,
+            (SCM image, SCM param_name),
+            "Return information of the OpenCl image object @var{image}\n"
+            "specified by the OpenCL constant @var{param_name}.") {
+    cl_mem      m  = scm_to_cl_image_here(image);
     cl_mem_info pn = scm_to_cl_uint(param_name);
 
     size_t buf_len;
@@ -414,7 +436,8 @@ SCM_DEFINE (scm_cl_info, "cl-info", 1, 1, 0,
         if(tag == cl_device_tag       ) return scm_cl_device_info(smob, param_name);
         if(tag == cl_context_tag      ) return scm_cl_context_info(smob, param_name);
         if(tag == cl_command_queue_tag) return scm_cl_command_queue_info(smob, param_name);
-        if(tag == cl_mem_tag          ) return scm_cl_mem_info(smob, param_name);
+        if(tag == cl_buffer_tag       ) return scm_cl_buffer_info(smob, param_name);
+        if(tag == cl_image_tag        ) return scm_cl_image_info(smob, param_name);
         if(tag == cl_program_tag      ) return scm_cl_program_info(smob, param_name);
         if(tag == cl_kernel_tag       ) return scm_cl_kernel_info(smob, param_name);
         if(tag == cl_event_tag        ) return scm_cl_event_info(smob, param_name);
@@ -465,7 +488,11 @@ SCM_DEFINE (scm_cl_info, "cl-info", 1, 1, 0,
         ACONS_CL_INFO(CL_QUEUE_DEVICE, smob, ret);
         return ret;
     }
-    if(tag == cl_mem_tag) {
+    if(tag == cl_buffer_tag) {
+        ACONS_CL_INFO(CL_MEM_SIZE, smob, ret);
+        return ret;
+    }
+    if(tag == cl_image_tag) {
         ACONS_CL_INFO(CL_MEM_SIZE, smob, ret);
         return ret;
     }

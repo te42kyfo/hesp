@@ -27,22 +27,22 @@ SCM_DEFINE (scm_set_cl_kernel_arg, "set-cl-kernel-arg", 3, 0, 0,
             "Set the argument @var{argnum} of the OpenCL kernel @var{kernel}\n"
             "to the value stored inside the length-one bytevector or\n"
             "cl memory object @var{data}.") {
-    bool cl_mem_p = scm_to_bool(scm_cl_mem_p(data));
+    bool cl_buffer_p = scm_to_bool(scm_cl_buffer_p(data));
     bool cl_bv_p  = scm_to_bool(scm_bytevector_p(data));
-    SCM_ASSERT_TYPE(cl_mem_p || cl_bv_p,
-                    data, SCM_ARG3, __func__, "bytevector or cl-mem");
+    SCM_ASSERT_TYPE(cl_buffer_p || cl_bv_p,
+                    data, SCM_ARG3, __func__, "bytevector or cl-buffer");
     cl_kernel k = scm_to_cl_kernel_here(kernel);
     cl_uint   n = scm_to_cl_uint(argnum);
     size_t    s;
     size_t   *p;
-    cl_mem mem;
+    cl_mem buffer;
     if(cl_bv_p) {
         s =           SCM_BYTEVECTOR_LENGTH(data);
         p = (size_t *)SCM_BYTEVECTOR_CONTENTS(data);
     } else {
         s = sizeof(cl_mem);
-        mem = (cl_mem)SCM_SMOB_DATA(data);
-        p = (size_t *)&mem;
+        buffer = scm_from_cl_buffer(data);
+        p = (size_t *)&buffer;
     }
 
     CL_CHECK( clSetKernelArg(k, n, s, p) );

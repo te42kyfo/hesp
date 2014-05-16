@@ -29,8 +29,11 @@ SCM scm_from_cl_context       (cl_context       handle) {
 SCM scm_from_cl_command_queue (cl_command_queue handle) {
     SCM_FROM_CL_BODY(handle, cl_command_queue_tag);
 }
-SCM scm_from_cl_mem           (cl_mem           handle) {
-    SCM_FROM_CL_BODY(handle, cl_mem_tag);
+SCM scm_from_cl_buffer        (cl_mem           handle) {
+    SCM_FROM_CL_BODY(handle, cl_buffer_tag);
+}
+SCM scm_from_cl_image         (cl_mem           handle) {
+    SCM_FROM_CL_BODY(handle, cl_image_tag);
 }
 SCM scm_from_cl_program       (cl_program       handle) {
     SCM_FROM_CL_BODY(handle, cl_program_tag);
@@ -67,9 +70,14 @@ cl_command_queue scm_to_cl_command_queue (SCM obj, const char *subr) {
         scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-command-queue");
     return (cl_command_queue)SCM_SMOB_DATA(obj);
 }
-cl_mem scm_to_cl_mem (SCM obj, const char *subr) {
-    if(!scm_to_bool(scm_cl_mem_p(obj)))
-        scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-mem");
+cl_mem scm_to_cl_buffer (SCM obj, const char *subr) {
+    if(!scm_to_bool(scm_cl_buffer_p(obj)))
+        scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-buffer");
+    return (cl_mem)SCM_SMOB_DATA(obj);
+}
+cl_mem scm_to_cl_image (SCM obj, const char *subr) {
+    if(!scm_to_bool(scm_cl_image_p(obj)))
+        scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-image");
     return (cl_mem)SCM_SMOB_DATA(obj);
 }
 cl_program scm_to_cl_program (SCM obj, const char *subr) {
