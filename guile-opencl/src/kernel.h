@@ -17,7 +17,7 @@
  * cl_half), together with cl_event and cl_mem
  */
 
-enum scm_t_cl_kernel_type {
+enum scm_cl_arg_type {
     SCM_TYPE_CL_BOOL,
     SCM_TYPE_CL_CHAR,
     SCM_TYPE_CL_UCHAR,
@@ -36,9 +36,19 @@ enum scm_t_cl_kernel_type {
     SCM_TYPE_LAST = SCM_TYPE_CL_SAMPLER
   };
 
-SCM scm_make_cl_kernel (SCM program, SCM name);
+typedef enum scm_cl_arg_type scm_cl_arg_type;
 
-SCM scm_set_cl_kernel_arg (SCM kernel, SCM argnum, SCM bv_or_cl_mem);
+struct typed_cl_kernel {
+    cl_kernel kernel;
+    size_t    typec;
+    scm_cl_arg_type* types;
+};
+
+typedef struct typed_cl_kernel typed_cl_kernel;
+
+SCM scm_make_cl_kernel (SCM program, SCM name, SCM args);
+
+SCM scm_set_cl_kernel_args (SCM kernel, SCM args);
 
 SCM scm_enqueue_cl_kernel (SCM command_queue, SCM kernel,
                            SCM offset_list, SCM global_list, SCM local_list,

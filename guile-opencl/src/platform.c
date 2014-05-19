@@ -6,7 +6,9 @@
 
 SCM_DEFINE (scm_get_cl_platforms, "get-cl-platforms", 0, 0, 0,
             (),
-            "Return a list of all avilable OpenCL platforms.") {
+            "Return a list of all avilable OpenCL platforms.")
+#define FUNC_NAME s_scm_get_cl_platforms
+{
     cl_uint         num_platforms;
     CL_CHECK( clGetPlatformIDs(0, NULL, &num_platforms) );
     if(0 == num_platforms) return SCM_EOL;
@@ -22,7 +24,7 @@ SCM_DEFINE (scm_get_cl_platforms, "get-cl-platforms", 0, 0, 0,
     }
     return ret;
 }
-
+#undef FUNC_NAME
 
 void guile_opencl_init_platform() {
 #ifndef SCM_MAGIC_SNARFER

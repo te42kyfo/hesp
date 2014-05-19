@@ -16,81 +16,101 @@ SCM_DEFINE (scm_cl_platform_p, "cl-platform?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL platform,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_platform_p
 {
     return type_p(x, cl_platform_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_device_p, "cl-device?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL device,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_device_p
 {
     return type_p(x, cl_device_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_context_p, "cl-context?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL context,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_context_p
 {
     return type_p(x, cl_context_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_command_queue_p, "cl-command-queue?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL command queue,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_command_queue_p
 {
     return type_p(x, cl_command_queue_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_buffer_p, "cl-buffer?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL buffer,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_buffer_p
 {
     return type_p(x, cl_buffer_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_image_p, "cl-image?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL image,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_image_p
 {
     return type_p(x, cl_image_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_program_p, "cl-program?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL program,\n"
             " else @code{#f}.")
+#define FUNC_NAME s_scm_cl_program_p
 {
     return type_p(x, cl_program_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_kernel_p, "cl-kernel?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL kernel,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_kernel_p
 {
     return type_p(x, cl_kernel_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_event_p, "cl-event?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL event,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_event_p
 {
     return type_p(x, cl_event_tag);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_cl_sampler_p, "cl-sampler?", 1, 0, 0,
            (SCM x),
             "Return @code{#t} iff @var{x} is a OpenCL sampler,\n"
             "else @code{#f}.")
+#define FUNC_NAME s_scm_cl_sampler_p
 {
     return type_p(x, cl_sampler_tag);
 }
+#undef FUNC_NAME
 
 void guile_opencl_init_predicates () {
 #ifndef SCM_MAGIC_SNARFER

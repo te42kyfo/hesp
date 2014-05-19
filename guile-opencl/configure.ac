@@ -20,10 +20,18 @@ if test "x$guile_snarf" = "xnot-found"; then
 fi
 GUILE_SITE_DIR
 
+# TODO check for OpenCL header.
+pkgdatadir="$prefix/share/guile/site/$GUILE_EFFECTIVE_VERSION"
+if test "x$guilemoduledir" = "x"; then
+  guilemoduledir="$pkgdatadir"
+fi
+AC_SUBST([guilemoduledir])
+
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_FILES([
  Makefile
  src/Makefile
+ modules/Makefile
 ])
 
 AC_OUTPUT

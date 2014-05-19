@@ -4,6 +4,7 @@
 #include "error.h"
 #include "constants.h"
 #include "predicates.h"
+#include "kernel.h"
 
 /* ensure compatibility across guile versions */
 #ifndef SCM_NEWSMOB
@@ -11,42 +12,63 @@
     smob = scm_new_smob(tag, data);
 #endif
 
-#define SCM_FROM_CL_BODY(handle, tag)                            \
-    SCM x;                                                       \
-    SCM_NEWSMOB(x, guile_opencl_tag, (scm_t_bits)handle);        \
-    SCM_SET_SMOB_FLAGS(x, tag);                                  \
-    return x
+#define RETURN_SCM_FROM_CL(data, tag) do {                              \
+        SCM x;                                                   \
+        SCM_NEWSMOB(x, guile_opencl_tag, (scm_t_bits)data);      \
+        SCM_SET_SMOB_FLAGS(x, tag);                              \
+        return x;                                                \
+    } while (0)
 
-SCM scm_from_cl_platform_id   (cl_platform_id   handle) {
-    SCM_FROM_CL_BODY(handle, cl_platform_tag);
+SCM scm_from_cl_platform_id   (cl_platform_id   data) {
+    RETURN_SCM_FROM_CL(data, cl_platform_tag);
 }
-SCM scm_from_cl_device_id     (cl_device_id     handle) {
-    SCM_FROM_CL_BODY(handle, cl_device_tag);
+SCM scm_from_cl_device_id     (cl_device_id     data) {
+    RETURN_SCM_FROM_CL(data, cl_device_tag);
 }
-SCM scm_from_cl_context       (cl_context       handle) {
-    SCM_FROM_CL_BODY(handle, cl_context_tag);
+SCM scm_from_cl_context       (cl_context       data) {
+    RETURN_SCM_FROM_CL(data, cl_context_tag);
 }
-SCM scm_from_cl_command_queue (cl_command_queue handle) {
-    SCM_FROM_CL_BODY(handle, cl_command_queue_tag);
+SCM scm_from_cl_command_queue (cl_command_queue data) {
+    RETURN_SCM_FROM_CL(data, cl_command_queue_tag);
 }
-SCM scm_from_cl_buffer        (cl_mem           handle) {
-    SCM_FROM_CL_BODY(handle, cl_buffer_tag);
+SCM scm_from_cl_buffer        (cl_mem           data) {
+    RETURN_SCM_FROM_CL(data, cl_buffer_tag);
 }
-SCM scm_from_cl_image         (cl_mem           handle) {
-    SCM_FROM_CL_BODY(handle, cl_image_tag);
+SCM scm_from_cl_image         (cl_mem           data) {
+    RETURN_SCM_FROM_CL(data, cl_image_tag);
 }
-SCM scm_from_cl_program       (cl_program       handle) {
-    SCM_FROM_CL_BODY(handle, cl_program_tag);
+SCM scm_from_cl_program       (cl_program       data) {
+    RETURN_SCM_FROM_CL(data, cl_program_tag);
 }
-SCM scm_from_cl_kernel        (cl_kernel        handle) {
-    SCM_FROM_CL_BODY(handle, cl_kernel_tag);
+SCM scm_from_cl_kernel        (cl_kernel        data, SCM types) {
+    SCM x;
+    size_t typec = scm_to_size_t(scm_length(types));
+    scm_cl_arg_type *c_types;
+    typed_cl_kernel *tkernel;
+    c_types = (scm_cl_arg_type *)scm_gc_malloc(sizeof(scm_cl_arg_type) * typec,
+                                               "scm_cl_arg_type");
+    size_t index = 0;
+    SCM    rest  = types;
+    while(!scm_to_bool(scm_null_p(rest))) {
+        c_types[index] = scm_to_int(scm_car(rest));
+        ++index;
+        rest = scm_cdr(rest);
+    }
+    tkernel = (typed_cl_kernel *)scm_gc_malloc(sizeof(typed_cl_kernel),
+                                               "typed_cl_kernel");
+    tkernel->kernel = data;
+    tkernel->typec = typec;
+    tkernel->types = c_types;
+    RETURN_SCM_FROM_CL(tkernel, cl_kernel_tag);
 }
-SCM scm_from_cl_event         (cl_event         handle) {
-    SCM_FROM_CL_BODY(handle, cl_event_tag);
+SCM scm_from_cl_event         (cl_event         data) {
+    RETURN_SCM_FROM_CL(data, cl_event_tag);
 }
-SCM scm_from_cl_sampler       (cl_sampler       handle) {
-    SCM_FROM_CL_BODY(handle, cl_sampler_tag);
+SCM scm_from_cl_sampler       (cl_sampler       data) {
+    RETURN_SCM_FROM_CL(data, cl_sampler_tag);
 }
+
+#undef RETURN_SCM_FROM_CL
 
 /* ==== SCM to C conversion routines ==== */
 
@@ -80,6 +102,12 @@ cl_mem scm_to_cl_image (SCM obj, const char *subr) {
         scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-image");
     return (cl_mem)SCM_SMOB_DATA(obj);
 }
+cl_mem scm_to_cl_mem (SCM obj, const char *subr) {
+    if(! (   scm_to_bool(scm_cl_image_p  (obj))
+          || scm_to_bool(scm_cl_buffer_p (obj))))
+        scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-image");
+    return (cl_mem)SCM_SMOB_DATA(obj);
+}
 cl_program scm_to_cl_program (SCM obj, const char *subr) {
     if(!scm_to_bool(scm_cl_program_p(obj)))
         scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-program");
@@ -88,7 +116,10 @@ cl_program scm_to_cl_program (SCM obj, const char *subr) {
 cl_kernel scm_to_cl_kernel (SCM obj, const char *subr) {
     if(!scm_to_bool(scm_cl_kernel_p(obj)))
         scm_wrong_type_arg_msg(__func__, SCM_ARG1, obj, "cl-kernel");
-    return (cl_kernel)SCM_SMOB_DATA(obj);
+    typed_cl_kernel *tk = (typed_cl_kernel *)SCM_SMOB_DATA(obj);
+    cl_kernel        k  = tk->kernel;
+    scm_remember_upto_here_1(obj);
+    return k;
 }
 cl_event scm_to_cl_event (SCM obj, const char *subr) {
     if(!scm_to_bool(scm_cl_event_p(obj)))

@@ -7,52 +7,63 @@
 SCM_DEFINE (scm_string_to_cl_program, "string->cl-program", 2, 0, 0,
             (SCM context, SCM sourcecode),
             "Create a new OpenCL program in context @var{context}"
-            "with the sourcecode @var{sourcecode}.") {
-    cl_context  c = scm_to_cl_context_here(context);
+            "with the sourcecode @var{sourcecode}.")
+#define FUNC_NAME s_scm_string_to_cl_program
+{
+    cl_context  cnt = scm_to_cl_context_here(context);
     size_t      len;
     char       *src;
     cl_int      err;
 
     scm_dynwind_begin(0);
-    src = scm_to_locale_stringn(sourcecode, &len);
-    cl_program  program = clCreateProgramWithSource(c, 1,
+    src = scm_to_utf8_stringn(sourcecode, &len);
+    cl_program  program = clCreateProgramWithSource(cnt, 1,
                                                     (const char **)&src, &len, &err);
     scm_dynwind_free(src);
     scm_dynwind_end();
     CL_CHECK( err );
     return scm_from_cl_program(program);
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_binary_to_cl_program, "binary->cl-program", 3, 0, 0,
             (SCM context, SCM devices, SCM binaries),
             "Create an OpenCL program for context @var{context}\n"
             "from a list of OpenCL devices @var{devices} and a list\n"
             "of same length with bytevectors containing the program\n"
-            "binaries." ) {
+            "binaries." )
+#define FUNC_NAME s_scm_binary_to_cl_program
+{
     return SCM_EOL; // TODO
 }
+#undef FUNC_NAME
 
 SCM_DEFINE (scm_build_cl_program, "build-cl-program", 3, 0, 0,
             (SCM program, SCM devices, SCM options),
             "Compile the sourcecode of the OpenCL program @var{program}\n"
             "for each OpenCL device given in @var{devices}.\n"
-            "Options is a string detailing the compilation.") {
-    cl_program   p = scm_to_cl_program_here(program);
-    size_t       n = scm_to_size_t(scm_length(devices));
-    cl_device_id d[n];
+            "Options is a string detailing the compilation.")
+#define FUNC_NAME s_scm_build_cl_program
+{
+    cl_program   prog        = scm_to_cl_program_here(program);
+    size_t       num_devices = scm_to_size_t(scm_length(devices));
+    cl_device_id device_array[num_devices];
     scm_dynwind_begin(0);
-    char        *o = scm_to_locale_string(options);
+    char        *c_options = scm_to_locale_string(options);
     SCM rest = devices;
-    for(size_t i = 0; i < n; ++i) {
-        SCM e    = SCM_CAR(rest);
+    for(size_t index = 0; index < num_devices; ++index) {
+        SCM device = SCM_CAR(rest);
         rest     = SCM_CDR(rest);
-        d[i]     = scm_to_cl_device_id_here(e);
+        device_array[index] = scm_to_cl_device_id_here(device);
     }
-    CL_CHECK( clBuildProgram(p, n, d, o, NULL, NULL) ); // TODO add callback?
-    scm_dynwind_free(o);
+    CL_CHECK( clBuildProgram(prog,
+                             num_devices, device_array,
+                             c_options, NULL, NULL) ); // TODO add callback
+    scm_dynwind_free(c_options);
     scm_dynwind_end();
     return program;
 }
+#undef FUNC_NAME
 
 void guile_opencl_init_program() {
 #ifndef SCM_MAGIC_SNARFER

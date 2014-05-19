@@ -10,15 +10,8 @@ them are also just fancy ideas.
 - Instead of copy rectangle, provide a cl-copy-array function that takes any
   array, shared array, vector or bytevector and moves it from/to a device.
 
-- guile-opencl should be a Guile module, not just global declarations
-
 - Image support is completely missing. This includes kernel arguments,
   samplers and all routines working on images.
-
-- SCM to OpenCL conversions are always type-checked. However some other data
-  types might not get checked. I should review this.
-
-- Check whether all SCM bytevectors on the C stack are properly remembered
 
 - Write a ax_opencl.m4 to portably detect the OpenCL header and library.
 
@@ -26,3 +19,5 @@ them are also just fancy ideas.
 
 - Provide good documentation. Especially do I have to extract existing
   docstrings from my .c files.
+
+- Implement event wait lists on all enqueue operations
