@@ -20,7 +20,11 @@ if test "x$guile_snarf" = "xnot-found"; then
 fi
 GUILE_SITE_DIR
 
-# TODO check for OpenCL header.
+AX_HAVE_OPENCL
+if test "x$ax_cv_have_opencl" != xyes ; then
+   AC_MSG_ERROR([`OpenCL' not found. Please install an OpenCL implementation.])
+fi
+
 pkgdatadir="$prefix/share/guile/site/$GUILE_EFFECTIVE_VERSION"
 if test "x$guilemoduledir" = "x"; then
   guilemoduledir="$pkgdatadir"

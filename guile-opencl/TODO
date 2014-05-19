@@ -1,10 +1,6 @@
 An incomplete list of open issues one might address sooner or later. Some of
 them are also just fancy ideas.
 
-- all OpenCL handles must be small enough to fit into the data cell of a
-  SMOB. CL/cl.h declares them as pointers, so everyting should be fine. Maybe
-  a configure check would be appropriate.
-
 - install specially taylored callbacks by default
 
 - Instead of copy rectangle, provide a cl-copy-array function that takes any
@@ -12,8 +8,6 @@ them are also just fancy ideas.
 
 - Image support is completely missing. This includes kernel arguments,
   samplers and all routines working on images.
-
-- Write a ax_opencl.m4 to portably detect the OpenCL header and library.
 
 - Provide examples
 
