@@ -14,7 +14,6 @@ SCM_DEFINE (scm_get_cl_platforms, "get-cl-platforms", 0, 0, 0,
     if(0 == num_platforms) return SCM_EOL;
 
     cl_platform_id platforms[num_platforms];
-    if(NULL == platforms) perror( __func__ );
     CL_CHECK( clGetPlatformIDs(num_platforms, platforms, NULL) );
 
     SCM  ret = SCM_EOL;

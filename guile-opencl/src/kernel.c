@@ -49,7 +49,7 @@ SCM_DEFINE (scm_set_cl_kernel_args, "set-cl-kernel-args", 1, 0, 1,
 #define FUNC_NAME s_scm_set_cl_kernel_args
 {
     SCM_ASSERT_TYPE(scm_to_bool(scm_cl_kernel_p(kernel)),
-                    kernel, SCM_ARG1, __func__, "cl-kernel");
+                    kernel, SCM_ARG1, FUNC_NAME, "cl-kernel");
 
     typed_cl_kernel *tk    = (typed_cl_kernel *)SCM_SMOB_DATA(kernel);
     size_t           typec = tk->typec;
@@ -59,7 +59,7 @@ SCM_DEFINE (scm_set_cl_kernel_args, "set-cl-kernel-args", 1, 0, 1,
     size_t index = 0;
     SCM    rest  = args;
     while(!scm_to_bool(scm_null_p(rest))) {
-        if(index > typec) scm_wrong_num_args(scm_from_locale_string (__func__));
+        if(index > typec) scm_wrong_num_args(scm_from_locale_string (FUNC_NAME));
         scm_cl_arg_type type = types[index];
         SCM arg = scm_car(rest);
         rest = scm_cdr(rest);
@@ -85,7 +85,7 @@ SCM_DEFINE (scm_set_cl_kernel_args, "set-cl-kernel-args", 1, 0, 1,
 #undef CONVERT_NATIVE
 #define CONVERT_CL(what, type)                                          \
             case what: {                                                \
-                type c_arg = scm_to_##type (arg, __func__);             \
+                type c_arg = scm_to_##type (arg, FUNC_NAME);             \
                 CL_CHECK( clSetKernelArg(k, index, sizeof(type),        \
                                          &c_arg));                      \
                 break;                                                  \
@@ -95,11 +95,11 @@ SCM_DEFINE (scm_set_cl_kernel_args, "set-cl-kernel-args", 1, 0, 1,
             CONVERT_CL(SCM_TYPE_CL_SAMPLER, cl_sampler);
 #undef CONVERT_CL
         default:
-            scm_misc_error(__func__, "invalid kernel argument type", kernel);
+            scm_misc_error(FUNC_NAME, "invalid kernel argument type", kernel);
         }
         ++index;
     }
-    if(index != typec) scm_wrong_num_args(scm_from_locale_string (__func__));
+    if(index != typec) scm_wrong_num_args(scm_from_locale_string (FUNC_NAME));
 
     scm_remember_upto_here_1(kernel);
     return kernel;

@@ -3,7 +3,9 @@
 #include "info.h"
 #include "constants.h"
 
-int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
+int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate)
+#define FUNC_NAME "print_guile_opencl"
+{
     scm_t_bits tag = SCM_SMOB_FLAGS(smob);
 
     if(tag == cl_platform_tag) {
@@ -55,9 +57,10 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate) {
         scm_puts("#<cl-sampler: >", port); // TODO
         return 1;
     }
-    scm_misc_error(__func__, "smob of invalid type", SCM_EOL);
+    scm_misc_error(FUNC_NAME, "smob of invalid type", SCM_EOL);
     return 1;
 }
+#undef FUNC_NAME
 
 void guile_opencl_init_print() {
 #ifndef SCM_MAGIC_SNARFER

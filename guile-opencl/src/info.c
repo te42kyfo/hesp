@@ -48,7 +48,7 @@ SCM_DEFINE (scm_cl_device_info, "cl-device-info", 2, 0, 0,
         case CL_DEVICE_TYPE_ALL:
             return scm_from_utf8_string("CL_DEVICE_TYPE_ALL");
         }
-        scm_misc_error(__func__, "invalid cl_device_type", SCM_EOL);
+        scm_misc_error(FUNC_NAME, "invalid cl_device_type", SCM_EOL);
     }
     case CL_DEVICE_VENDOR_ID:
     case CL_DEVICE_MAX_COMPUTE_UNITS:
@@ -133,14 +133,14 @@ SCM_DEFINE (scm_cl_device_info, "cl-device-info", 2, 0, 0,
             return scm_from_utf8_string("CL_READ_ONLY_CACHE");
         if(CL_READ_WRITE_CACHE == value)
             return scm_from_utf8_string("CL_READ_WRITE_CACHE");
-        scm_misc_error(__func__, "inalid cl_device_mem_cache_type", SCM_EOL);
+        scm_misc_error(FUNC_NAME, "inalid cl_device_mem_cache_type", SCM_EOL);
     }
     case CL_DEVICE_LOCAL_MEM_TYPE: {
         cl_device_local_mem_type value = *(cl_device_local_mem_type*)buffer;
         if(CL_NONE == value) return scm_from_utf8_string("CL_NONE");
         if(CL_LOCAL == value) return scm_from_utf8_string("CL_LOCAL");
         if(CL_GLOBAL == value) return scm_from_utf8_string("CL_GLOBAL");
-        scm_misc_error(__func__, "inalid cl_device_local_mem_type", SCM_EOL);
+        scm_misc_error(FUNC_NAME, "inalid cl_device_local_mem_type", SCM_EOL);
     }
     case CL_DEVICE_EXECUTION_CAPABILITIES: {
         cl_device_exec_capabilities value = *(cl_device_exec_capabilities*)buffer;
@@ -482,7 +482,7 @@ SCM_DEFINE (scm_cl_info, "cl-info", 1, 1, 0,
         if(tag == cl_kernel_tag       ) return scm_cl_kernel_info(smob, param_name);
         if(tag == cl_event_tag        ) return scm_cl_event_info(smob, param_name);
         if(tag == cl_sampler_tag      ) return scm_cl_sampler_info(smob, param_name);
-        scm_wrong_type_arg_msg(__func__, SCM_ARG1, smob, "opencl smob");
+        scm_wrong_type_arg_msg(FUNC_NAME, SCM_ARG1, smob, "opencl smob");
         return SCM_EOL;
     }
 
@@ -555,7 +555,7 @@ SCM_DEFINE (scm_cl_info, "cl-info", 1, 1, 0,
         ACONS_CL_INFO(CL_SAMPLER_CONTEXT, smob, ret);
         return ret;
     }
-    scm_wrong_type_arg_msg(__func__, SCM_ARG1, smob, "opencl smob");
+    scm_wrong_type_arg_msg(FUNC_NAME, SCM_ARG1, smob, "opencl smob");
     return ret;
 }
 #undef FUNC_NAME

@@ -18,7 +18,7 @@ SCM_DEFINE (scm_make_cl_buffer, "make-cl-buffer", 3, 1, 0,
     } else {
         SCM_VALIDATE_BYTEVECTOR(SCM_ARG4, bv);
         size_t len = SCM_BYTEVECTOR_LENGTH(bv);
-        if(len < s) scm_out_of_range(__func__, size);
+        if(len < s) scm_out_of_range(FUNC_NAME, size);
         hp = SCM_BYTEVECTOR_CONTENTS(bv);
     }
 
@@ -42,7 +42,7 @@ SCM_DEFINE (scm_alias_bytevector, "alias-bytevector", 3, 0, 0,
     size_t o = scm_to_size_t(offset);
     size_t l = scm_to_size_t(bv_size);
     if((s + o) >= l) {
-        scm_misc_error(__func__,
+        scm_misc_error(FUNC_NAME,
                        "Cannot alias bytevector with length ~A "
                        "with an offset of ~A and length ~A.",
                        scm_list_3(bv_size, offset, size) );
@@ -114,7 +114,7 @@ SCM_DEFINE (scm_enqueue_copy_cl_buffer, "enqueue-copy-cl-buffer", 6, 0, 1,
             "before the operation starts.\n\n"
             "This function returns an OpenCL event detailing the state of\n"
             "this operation.")
-#define s_scm_enqueue_copy_cl_buffer
+#define FUNC_NAME s_scm_enqueue_copy_cl_buffer
 {
     cl_command_queue q = scm_to_cl_command_queue_here(queue);
     cl_mem src  = scm_to_cl_buffer_here(src_buffer);
