@@ -4,7 +4,7 @@
 #include <CL/cl.h>
 
 #define DEFINE_CONSTANT(NAME)                                           \
-    SCM_GLOBAL_VARIABLE_INIT(SCM_##NAME, #NAME, scm_from_cl_uint(NAME))
+    SCM_GLOBAL_VARIABLE_INIT(SCM_##NAME, #NAME, scm_from_cl_uint( NAME ))
 
 DEFINE_CONSTANT( CL_VERSION_1_0 );
 DEFINE_CONSTANT( CL_VERSION_1_1 );

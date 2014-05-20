@@ -2,5 +2,5 @@
 
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS       = src modules
+SUBDIRS       = src modules testsuite
 dist_doc_DATA = README

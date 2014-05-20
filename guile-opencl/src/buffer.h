@@ -23,7 +23,7 @@ SCM scm_enqueue_copy_cl_buffer (SCM command_queue,
                                 SCM src_offset, SCM dst_offset, SCM size,
                                 SCM event_wait_list); // -> event
 
-#ifdef CL_VERSION_1_2 // TODO without including CL/cl.h this is always false
+#ifdef CL_VERSION_1_2
 SCM scm_enqueue_fill_cl_buffer(SCM command_queue, SCM buffer,
                                SCM pattern, // bytevector
                                SCM offset, SCM size,

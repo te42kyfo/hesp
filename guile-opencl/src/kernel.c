@@ -59,7 +59,7 @@ SCM_DEFINE (scm_set_cl_kernel_args, "set-cl-kernel-args", 1, 0, 1,
     size_t index = 0;
     SCM    rest  = args;
     while(!scm_to_bool(scm_null_p(rest))) {
-        if(index > typec) scm_wrong_num_args(scm_from_locale_string (FUNC_NAME));
+        if(index > typec) scm_wrong_num_args(scm_from_utf8_string (FUNC_NAME));
         scm_cl_arg_type type = types[index];
         SCM arg = scm_car(rest);
         rest = scm_cdr(rest);
@@ -123,7 +123,7 @@ SCM_DEFINE (scm_enqueue_cl_kernel, "enqueue-cl-kernel", 5, 0, 1,
     size_t local_dims;
     SCM_VALIDATE_LIST_COPYLEN(SCM_ARG3, offsets, offset_dims);
     SCM_VALIDATE_LIST_COPYLEN(SCM_ARG4, globals, global_dims);
-    SCM_VALIDATE_LIST_COPYLEN(SCM_ARG5, locals , local_dims );
+    SCM_VALIDATE_LIST_COPYLEN(SCM_ARG5, locals ,  local_dims);
     cl_command_queue cq  = scm_to_cl_command_queue_here(queue);
     cl_kernel        ker = scm_to_cl_kernel_here(kernel);
     if(!( offset_dims == global_dims && global_dims == local_dims))
@@ -140,7 +140,6 @@ SCM_DEFINE (scm_enqueue_cl_kernel, "enqueue-cl-kernel", 5, 0, 1,
         global[index] = scm_to_size_t(scm_list_ref( globals, scm_index));
         local [index] = scm_to_size_t(scm_list_ref( locals , scm_index));
     }
-
     // TODO event wait list
     cl_event event;
     CL_CHECK( clEnqueueNDRangeKernel(cq, ker,

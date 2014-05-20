@@ -21,3 +21,5 @@ lib/*
 *.lo
 *.o
 stamp-h[0-9]
+*.trs
+*.log

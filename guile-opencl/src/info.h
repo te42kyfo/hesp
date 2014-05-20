@@ -8,7 +8,7 @@
 SCM scm_cl_platform_info          (SCM platform, SCM param_name);
 SCM scm_cl_device_info            (SCM device,   SCM param_name);
 SCM scm_cl_buffer_info            (SCM buffer,   SCM param_name);
-SCM scm_cl_image_info             (SCM image,   SCM param_name);
+SCM scm_cl_image_info             (SCM image,    SCM param_name);
 SCM scm_cl_context_info           (SCM context,  SCM param_name);
 SCM scm_cl_command_queue_info     (SCM queue,    SCM param_name);
 SCM scm_cl_program_info           (SCM program,  SCM param_name);

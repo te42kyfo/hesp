@@ -2,6 +2,7 @@
 #include "print.h"
 #include "info.h"
 #include "constants.h"
+#include "conversion.h"
 
 int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate)
 #define FUNC_NAME "print_guile_opencl"
@@ -9,21 +10,21 @@ int print_guile_opencl(SCM smob, SCM port, scm_print_state *pstate)
     scm_t_bits tag = SCM_SMOB_FLAGS(smob);
 
     if(tag == cl_platform_tag) {
-        SCM key = SCM_CL_PLATFORM_NAME;
+        SCM key = scm_from_cl_uint(CL_PLATFORM_NAME);
         scm_puts("#<cl-platform: ", port);
         scm_display(scm_cl_platform_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }
     if(tag == cl_device_tag) {
-        SCM key = SCM_CL_DEVICE_NAME;
+        SCM key = scm_from_cl_uint(CL_DEVICE_NAME);
         scm_puts("#<cl-device: ", port);
         scm_display(scm_cl_device_info(smob, key), port);
         scm_puts(">", port);
         return 1;
     }
     if(tag == cl_context_tag) {
-        SCM key = SCM_CL_CONTEXT_DEVICES;
+        SCM key = scm_from_cl_uint(CL_CONTEXT_DEVICES);
         scm_puts("#<cl-context: ", port);
         scm_display(scm_cl_context_info(smob, key), port);
         scm_puts(">", port);

@@ -36,6 +36,7 @@ AC_CONFIG_FILES([
  Makefile
  src/Makefile
  modules/Makefile
+ testsuite/Makefile
 ])
 
 AC_OUTPUT
