@@ -5,6 +5,14 @@
 #include "error.h"
 #include "info.h"
 
+void context_creation_callback(const char *errinfo,
+                               const void *private_info,
+                               size_t cb,
+                               void *user_data)
+{
+    scm_misc_error("context_creation_callback", errinfo, SCM_UNDEFINED);
+}
+
 SCM_DEFINE (scm_make_cl_context, "make-cl-context", 0, 0, 1,
             (SCM devices),
             "Create a new OpenCL context containing all OpenCL devices\n"
@@ -41,7 +49,30 @@ SCM_DEFINE (scm_make_cl_context, "make-cl-context", 0, 0, 1,
 
     cl_int err;
     cl_context context = clCreateContext(cps, num_devices, device_array,
-                                         NULL, NULL, &err); // TODO callback
+                                         &context_creation_callback,
+                                         NULL, &err);
+    CL_CHECK( err );
+    return scm_from_cl_context(context);
+}
+#undef FUNC_NAME
+
+SCM_DEFINE (scm_make_cl_context_from_type, "make-cl-context-from-type", 2, 0, 0,
+            (SCM platform, SCM type),
+            "Create a new OpenCL context containing all OpenCL devices\n"
+            "of type @var{type} in the OpenCL platform @var{platform}")
+#define FUNC_NAME s_scm_make_cl_context
+{
+    cl_platform_id c_platform  = scm_to_cl_platform_id_here(platform);
+    cl_ulong    device_type = scm_to_cl_ulong(type);
+    cl_context_properties cps[3];
+    cps[0] = (cl_context_properties)CL_CONTEXT_PLATFORM;
+    cps[1] = (cl_context_properties)platform;
+    cps[2] = 0;
+
+    cl_int err;
+    cl_context context = clCreateContextFromType(cps, device_type,
+                                                 &context_creation_callback,
+                                                 NULL, &err);
     CL_CHECK( err );
     return scm_from_cl_context(context);
 }

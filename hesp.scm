@@ -2,6 +2,10 @@
 -e main -s
 !#
 
+(setenv "LD_LIBRARY_PATH"
+        (string-append
+         (getcwd) "/guile-opencl/lib"))
+
 (add-to-load-path
  (string-append
   (getcwd) "/guile-opencl/modules"))
@@ -16,7 +20,7 @@
              (system foreign)
              (guile-opencl))
 
-(load (string-append (getcwd) "/read-string.scm"))
+(load "read-string.scm")
 
 (define (hesp-print obj)
   (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))

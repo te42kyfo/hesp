@@ -3,12 +3,7 @@
 #include <libguile.h>
 #include <CL/cl.h>
 
-SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM bytevector);
-
-/* return a bytevector aliasing another bytevector. I do check that the new
-   bytevector does not go beyond the original one, but no further
-   checks. This is essentially pointer arithmetic, so be careful! */
-SCM scm_alias_bytevector (SCM bv, SCM size, SCM offset);
+SCM scm_make_cl_buffer (SCM context, SCM flags, SCM size, SCM bv);
 
 SCM scm_enqueue_read_cl_buffer(SCM command_queue,
                                SCM buffer, SCM offset, SCM bv,

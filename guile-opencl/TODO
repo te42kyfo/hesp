@@ -1,13 +1,25 @@
 An incomplete list of open issues one might address sooner or later. Some of
 them are also just fancy ideas.
 
-- install specially taylored callbacks by default
+- Many functions are still missing. Here is a list of mehthods that I still
+  have to implement
+  - All image and sampler routines
+
+- install specially taylored callbacks by default in
+  clCreateContextFromType
+  clBuildProgram
+  clCompileProgram
+  clSetMemObjectDestructorCallback
+  clLinkProgram
+  clEnqueueNativeKernel
+  clSetEventCallback
 
 - Instead of copy rectangle, provide a cl-copy-array function that takes any
   array, shared array, vector or bytevector and moves it from/to a device.
 
-- Image support is completely missing. This includes kernel arguments,
-  samplers and all routines working on images.
+- Check that all functions working on bytevectors work also on shared arrays
+
+- lock host buffers that are targets of device memory
 
 - Provide examples
 
@@ -15,3 +27,5 @@ them are also just fancy ideas.
   docstrings from my .c files.
 
 - Implement event wait lists on all enqueue operations
+
+- Export the underlying OpenCL version as a guile variable.

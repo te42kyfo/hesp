@@ -6,49 +6,30 @@
 
 SCM_DEFINE (scm_make_cl_buffer, "make-cl-buffer", 3, 1, 0,
             (SCM context, SCM flags, SCM size, SCM bv),
-            "Allocate an OpenCL buffer of size @var{size}.")
+            "Allocate an OpenCL buffer. This function is equivalent to\n"
+            "the OpenCL function clCreateBuffer.")
 #define FUNC_NAME s_scm_make_cl_buffer
 {
-    cl_context   c   = scm_to_cl_context_here(context);
-    cl_mem_flags f   = (cl_mem_flags)scm_to_cl_ulong(flags);
-    size_t       s   = scm_to_size_t(size);
-    void        *hp;
+    cl_context   c_context = scm_to_cl_context_here(context);
+    cl_mem_flags c_flags   = (cl_mem_flags)scm_to_cl_ulong(flags);
+    size_t       c_size    = scm_to_size_t(size);
+    void        *host_ptr;
     if(SCM_UNBNDP(bv)) {
-        hp = NULL;
+        host_ptr = NULL;
     } else {
         SCM_VALIDATE_BYTEVECTOR(SCM_ARG4, bv);
-        size_t len = SCM_BYTEVECTOR_LENGTH(bv);
-        if(len < s) scm_out_of_range(FUNC_NAME, size);
-        hp = SCM_BYTEVECTOR_CONTENTS(bv);
+        size_t bv_len = SCM_BYTEVECTOR_LENGTH(bv);
+        if(bv_len < c_size) {
+            scm_misc_error(FUNC_NAME, "bytevector is too short", SCM_EOL);
+        }
+        host_ptr = SCM_BYTEVECTOR_CONTENTS(bv);
     }
 
     cl_int err;
-    cl_mem buffer = clCreateBuffer(c, f, s, hp, &err);
+    cl_mem buffer = clCreateBuffer(c_context, c_flags, c_size, host_ptr, &err);
+    scm_remember_upto_here_1(bv);
     CL_CHECK( err );
     return scm_from_cl_buffer(buffer);
-}
-#undef FUNC_NAME
-
-SCM_DEFINE (scm_alias_bytevector, "alias-bytevector", 3, 0, 0,
-            (SCM bv, SCM size, SCM offset),
-            "Return a bytevector of size @var{size} aliasing the\n"
-            "bytevector @var{bv} offset by @var{offset} bytes.\n"
-            "This is essentially C pointer arithmetic, so be careful!")
-#define FUNC_NAME s_scm_alias_bytevector
-{
-    SCM_VALIDATE_BYTEVECTOR(SCM_ARG1, bv);
-    SCM    bv_size = scm_bytevector_length(bv);
-    size_t s = scm_to_size_t(size);
-    size_t o = scm_to_size_t(offset);
-    size_t l = scm_to_size_t(bv_size);
-    if((s + o) >= l) {
-        scm_misc_error(FUNC_NAME,
-                       "Cannot alias bytevector with length ~A "
-                       "with an offset of ~A and length ~A.",
-                       scm_list_3(bv_size, offset, size) );
-    }
-    SCM ptr = scm_bytevector_to_pointer(bv, offset);
-    return scm_pointer_to_bytevector(ptr, size, SCM_UNDEFINED, SCM_UNDEFINED);
 }
 #undef FUNC_NAME
 

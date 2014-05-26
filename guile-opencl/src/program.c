@@ -51,9 +51,9 @@ SCM_DEFINE (scm_build_cl_program, "build-cl-program", 2, 1, 0,
     char        *c_options;
     scm_dynwind_begin(0);
     if(SCM_UNBNDP(options)) {
-        options = NULL;
+        c_options = NULL;
     } else {
-        options = scm_to_locale_string(options);
+        c_options = scm_to_locale_string(options);
     }
     SCM rest = devices;
     for(size_t index = 0; index < num_devices; ++index) {

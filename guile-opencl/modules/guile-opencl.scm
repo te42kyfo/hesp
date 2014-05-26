@@ -1,13 +1,15 @@
+;; Copyright (C) 2014 Marco Heisig - licensed under GPLv3 or later
+
 (define-module (guile-opencl)
   #:export
-  (make-cl-buffer ; buffer.c
+  (make-cl-buffer                       ; buffer.c
    alias-bytevector
    enqueue-read-cl-buffer
    enqueue-write-cl-buffer
    enqueue-copy-cl-buffer
    enqueue-map-cl-buffer
    enqueue-unmap-cl-buffer
-   CL_VERSION_1_0 ; constants.c
+   CL_VERSION_1_0                       ; constants.c
    CL_VERSION_1_1
    CL_FALSE
    CL_TRUE
@@ -232,9 +234,9 @@
    CL_PROFILING_COMMAND_SUBMIT
    CL_PROFILING_COMMAND_START
    CL_PROFILING_COMMAND_END
-   make-cl-context ; context.c
-   get-cl-devices ; device.c
-   cl-platform-info ; info.c
+   make-cl-context                      ; context.c
+   get-cl-devices                       ; device.c
+   cl-platform-info                     ; info.c
    cl-device-info
    cl-buffer-info
    cl-image-info
@@ -246,7 +248,7 @@
    cl-program-build-info
    cl-work-group-info
    cl-info
-   cl_bool ; kernel.c
+   cl_bool                              ; kernel.c
    cl_char
    cl_uchar
    cl_short
@@ -263,8 +265,8 @@
    make-cl-kernel
    set-cl-kernel-args
    enqueue-cl-kernel
-   get-cl-platforms ; platform.c
-   cl-platform? ; predicates.c
+   get-cl-platforms                     ; platform.c
+   cl-platform?                         ; predicates.c
    cl-device?
    cl-context?
    cl-command-queue?
@@ -274,16 +276,16 @@
    cl-kernel?
    cl-event?
    cl-sampler?
-   string->cl-program ; program.c
+   string->cl-program                   ; program.c
    binary->cl-program
    build-cl-program
-   make-cl-queue ; queue.c
+   make-cl-queue                        ; queue.c
    enqueue-cl-marker
    enqueue-cl-barrier
    enqueue-cl-wait
    cl-flush
    cl-finish
-   cl-enqueue ; guile-opencl.scm
+   cl-enqueue                           ; guile-opencl.scm
    ))
 
 (load-extension "libguile-opencl" "init_guile_opencl")

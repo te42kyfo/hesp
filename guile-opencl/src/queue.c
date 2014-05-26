@@ -3,6 +3,7 @@
 #include <CL/cl.h>
 #include "conversion.h"
 #include "error.h"
+#include "event.h"
 
 SCM_DEFINE (scm_make_cl_queue, "make-cl-queue", 2, 1, 0,
             (SCM context, SCM device, SCM flags),
@@ -23,39 +24,62 @@ SCM_DEFINE (scm_make_cl_queue, "make-cl-queue", 2, 1, 0,
 }
 #undef FUNC_NAME
 
+#ifdef CL_VERSION_1_2
 SCM_DEFINE (scm_enqueue_cl_marker, "enqueue-cl-marker", 1, 0, 1,
             (SCM queue, SCM events),
-            "Enqueue a marker in queue @var{queue}.\n"
-            "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.")
+            "Returns an event that finishes when all given events\n"
+            "@var{events} in the OpenCL command queue @var{queue}\n"
+            "have finished.")
 #define FUNC_NAME s_scm_enqueue_cl_marker
 {
-    return SCM_EOL; // TODO
+    cl_command_queue cmdqueue = scm_to_cl_command_queue_here(queue);
+    cl_uint   num_events_in_wait_list;
+    cl_event *event_wait_list;
+    scm_dynwind_begin(0);
+    scm_to_cl_event_wait_list(events,
+                              &num_events_in_wait_list,
+                              &event_wait_list);
+
+    cl_event event;
+    CL_CHECK( clEnqueueMarker(cmdqueue,
+                              num_events_in_wait_list,
+                              event_wait_list,
+                              &event) );
+    scm_dynwind_free(event_wait_list);
+    scm_dynwind_end();
+    return scm_from_cl_event(event);
 }
 #undef FUNC_NAME
+#endif // CL_VERSION_1_2
 
-SCM_DEFINE (scm_enqueue_cl_barrier, "enqueue-cl-barrier", 2, 0, 1,
-            (SCM queue, SCM mems, SCM events),
-            "Enqueue a barrier for the all OpenCL memory objects\n"
-            "in the list @var{mems} in the queue @var{queue}."
-            "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.")
+#ifdef CL_VERSION_1_2
+SCM_DEFINE (scm_enqueue_cl_barrier, "enqueue-cl-barrier", 1, 0, 1,
+            (SCM queue, SCM events),
+            "Returns an event that finishes when all given events\n"
+            "@var{events} in the OpenCL command queue @var{queue}\n"
+            "have finished. The barrier blocks further commands\n"
+            "that are added to @var{queue} until it has finished.")
 #define FUNC_NAME s_scm_enqueue_cl_barrier
 {
-    return SCM_EOL; // TODO
-}
-#undef FUNC_NAME
+    cl_command_queue cmdqueue = scm_to_cl_command_queue_here(queue);
+    cl_uint   num_events_in_wait_list;
+    cl_event *event_wait_list;
+    scm_dynwind_begin(0);
+    scm_to_cl_event_wait_list(events,
+                              &num_events_in_wait_list,
+                              &event_wait_list);
 
-SCM_DEFINE (scm_enqueue_cl_wait, "enqueue-cl-wait", 1, 0, 1,
-            (SCM queue, SCM events),
-            "Enqueue a barrier in queue @var{queue}.\n"
-            "@var{events} is a list of cl_events that have to be completed\n"
-            "before the operation starts.")
-#define FUNC_NAME s_scm_enqueue_cl_wait
-{
-    return SCM_EOL; // TODO
+    cl_event event;
+    CL_CHECK( clEnqueueBarrierWithWaitList(cmdqueue,
+                                           num_events_in_wait_list,
+                                           event_wait_list,
+                                           &event) );
+    scm_dynwind_free(event_wait_list);
+    scm_dynwind_end();
+    return scm_from_cl_event(event);
 }
 #undef FUNC_NAME
+#endif // CL_VERSION_1_2
 
 SCM_DEFINE (scm_cl_flush, "cl-flush", 1, 0, 0,
             (SCM queue),
