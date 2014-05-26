@@ -288,6 +288,7 @@
    cl-enqueue                           ; guile-opencl.scm
    ))
 
+
 (load-extension "libguile-opencl" "init_guile_opencl")
 
 (define-syntax cl-enqueue
