@@ -22,6 +22,9 @@
 
 (load "read-string.scm")
 
+(define (padd-to N blocksize)
+  (* blocksize (1+ (floor-quotient N blocksize))))
+
 (define (hesp-print obj)
   (let ((fmt (if (cl-platform? obj) "~22a = ~a~%" "~39a = ~a~%")))
     (map (lambda (x)
@@ -167,15 +170,18 @@
                                    (cddr rest)))))))
       (let ((part_input_file
 			 (string-append param-directory "/" ( assoc-ref param-alist "part_input_file")))
-            (timestep_length           (assoc-ref param-alist "timestep_length"))
-            (time_end                  (assoc-ref param-alist "time_end"))
-            (epsilon                   (assoc-ref param-alist "epsilon"))
-            (sigma                     (assoc-ref param-alist "sigma"))
-            (part_out_freq             (assoc-ref param-alist "part_out_freq"))
-            (part_out_name_base        (assoc-ref param-alist "part_out_name_base"))
-            (vtk_out_freq              (assoc-ref param-alist "vtk_out_freq"))
-            (vtk_out_name_base         (assoc-ref param-alist "vtk_out_name_base"))
-            (cl_workgroupt_1dsize      (assoc-ref param-alist "workgroup_1dsize"))
+            (timestep_length       (assoc-ref param-alist "timestep_length"))
+            (time_end              (assoc-ref param-alist "time_end"))
+            (epsilon               (assoc-ref param-alist "epsilon"))
+            (sigma                 (assoc-ref param-alist "sigma"))
+            (part_out_freq         (assoc-ref param-alist "part_out_freq"))
+            (part_out_name_base    (assoc-ref param-alist "part_out_name_base"))
+            (vtk_out_freq          (assoc-ref param-alist "vtk_out_freq"))
+            (vtk_out_name_base     (assoc-ref param-alist "vtk_out_name_base"))
+            (cl_workgroup_1dsize   (assoc-ref param-alist "cl_workgroup_1dsize"))
+            (cl_workgroup_3dsize_x (assoc-ref param-alist "cl_workgroup_3dsize_x"))
+            (cl_workgroup_3dsize_y (assoc-ref param-alist "cl_workgroup_3dsize_y"))
+            (cl_workgroup_3dsize_z (assoc-ref param-alist "cl_workgroup_3dsize_z"))
             (x_min      (assoc-ref param-alist "x_min"))
             (y_min      (assoc-ref param-alist "y_min"))
             (z_min      (assoc-ref param-alist "z_min"))
@@ -319,22 +325,22 @@
             (enqueue-cl-kernel queue update-velocities-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 
             (enqueue-cl-kernel queue update-positions-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 
 			(enqueue-cl-kernel queue reset-cells-kernel
                                (list 0)
                                (list (* x_n y_n z_n))
-                               (list (* x_n y_n z_n)))
+                               (list 1))
 
 			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
 
 
