@@ -63,6 +63,8 @@ __kernel void update_velocities( const unsigned int N,
 
 }
 
+
+
 __kernel void update_cells( const unsigned int N,
 							global long* cells, global long* links,
 							global real* px, global  real* py, global real* pz,
@@ -73,6 +75,10 @@ __kernel void update_cells( const unsigned int N,
 							const unsigned int nz ) {
 	const int globalid = get_global_id(0);
 
+	links[globalid] = globalid;
+
+	barrier( CLK_GLOBAL_MEM_FENCE );
+
 	const int xindex = (px[globalid]-xmin) / (xmax-xmin) * nx;
 	const int yindex = (py[globalid]-ymin) / (ymax-ymin) * ny;
 	const int zindex = (pz[globalid]-zmin) / (zmax-zmin) * nz;
@@ -80,8 +86,8 @@ __kernel void update_cells( const unsigned int N,
 	const int cellindex = zindex * nx*ny + yindex*nx + xindex;
 
 
-	links[globalid] = cellindex;//cells[cellindex];
-	//	cells[cellindex] = globalid;
+	//links[globalid] = cells[cellindex];
+	//cells[cellindex] = globalid;
 
 }
 
