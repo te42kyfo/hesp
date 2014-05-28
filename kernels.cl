@@ -62,3 +62,26 @@ __kernel void update_velocities( const unsigned int N,
 	fz[globalid] = new_force_z;
 
 }
+
+__kernel void update_cells( const unsigned int N,
+							global long* cells, global long* links,
+							global real* px, global  real* py, global real* pz,
+							const real xmin, const real ymin, const real zmin,
+							const real xmax, const real ymax, const real zmax,
+							const unsigned int nx,
+							const unsigned int ny,
+							const unsigned int nz ) {
+	const int globalid = get_global_id(0);
+
+	const int xindex = (px[globalid]-xmin) / (xmax-xmin) * nx;
+	const int yindex = (py[globalid]-ymin) / (ymax-ymin) * ny;
+	const int zindex = (pz[globalid]-zmin) / (zmax-zmin) * nz;
+
+	const int cellindex = zindex * nx*ny + yindex*nx + xindex;
+
+
+	links[globalid] = cellindex;//cells[cellindex];
+	//	cells[cellindex] = globalid;
+
+}
+
