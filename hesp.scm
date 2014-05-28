@@ -122,7 +122,7 @@
 										 (list device)
 										 "")) (lambda (key . args) program)))
          (build-log (cl-program-build-info program device CL_PROGRAM_BUILD_LOG)))
-    (format #t "=== build-log ===\n~a\n== end of build-log ===\n\n" build-log)
+    (format #t "=== build-log ===\n~a\n=== end of build-log ===\n\n" build-log)
     (let ((update-positions-kernel  (make-cl-kernel
                                      program
                                      "update_positions"
@@ -174,8 +174,7 @@
 
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
-						 (display tokens)
-                         (let lp ((alist (list))
+						                         (let lp ((alist (list))
                                   (token1 (car  tokens))
                                   (token2 (cadr tokens))
                                   (rest   (cddr tokens)))
@@ -216,7 +215,6 @@
 
             (vtk_out_current 0)
             (part_out_current 0))
-		(display param-alist)
         (let* ((port (open-input-file part_input_file))
                (N     (string->number (read-line port)))
                (px     (make-realvector N 0.0))

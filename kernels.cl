@@ -66,9 +66,19 @@ __kernel void update_velocities( const unsigned int N,
 				int ylocal = yindex+iy;
 				int zlocal = zindex+iz;
 
+				bool xwrapover = false;
+				bool ywrapover = false;
+				bool zwrapover = false;
+
+				if( xlocal >= nx || xlocal < 0) xwrapover = true;
+				if( ylocal >= ny || ylocal < 0) ywrapover = true;
+				if( zlocal >= nz || zlocal < 0) zwrapover = true;
+
 				xlocal %= nx;
 				ylocal %= ny;
 				zlocal %= nz;
+
+
 
 				const int cellindex = zlocal * nx*ny + ylocal *nx + xlocal;
 				int index = cells[cellindex];
@@ -77,9 +87,14 @@ __kernel void update_velocities( const unsigned int N,
 				while( index != -1 ) {
 					if( index != globalid ) {
 
+
 						real dx = px[globalid] - px[index];
 						real dy = py[globalid] - py[index];
 						real dz = pz[globalid] - pz[index];
+
+						if( xwrapover ) dx = (xmax-xmin) - dx;
+						if( ywrapover ) dy = (ymax-ymin) - dy;
+						if( zwrapover ) dz = (zmax-zmin) - dz;
 
 						real sqlength = (dx*dx + dy*dy + dz*dz);
 						if( sqlength <= r_cut*r_cut) {
