@@ -128,7 +128,9 @@
                                      cl_uint cl_float cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-                                     cl_buffer cl_buffer cl_buffer))
+                                     cl_buffer cl_buffer cl_buffer
+									 cl_float cl_float cl_float
+									 cl_float cl_float cl_float))
           (update-velocities-kernel (make-cl-kernel
                                      program
                                      "update_velocities"
@@ -207,8 +209,8 @@
                (fx     (make-realvector N 0.0))
                (fy     (make-realvector N 0.0))
                (fz     (make-realvector N 0.0))
-			   (cells  (make-s64vector (* x_n y_n z_n) -1))
-			   (links  (make-s64vector N -1))
+			   (cells  (make-s32vector (* x_n y_n z_n) -1))
+			   (links  (make-s32vector N -1))
 
 
                (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
@@ -232,9 +234,9 @@
                (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
                                        (* N (sizeof real))))
                (cells-dev (make-cl-buffer context CL_MEM_READ_WRITE
-										  (* (* x_n y_n z_n) 8)))
+										  (* x_n y_n z_n 4)))
                (links-dev (make-cl-buffer context CL_MEM_READ_WRITE
-										  (* N 8))))
+										  (* N 4))))
 
           (let ((buffers (list m px py pz vx vy vz)))
             (do ((i 0 (1+ i)))
@@ -266,7 +268,10 @@
                               N timestep_length m-dev
                               px-dev py-dev pz-dev
                               vx-dev vy-dev vz-dev
-                              fx-dev fy-dev fz-dev)
+                              fx-dev fy-dev fz-dev
+							  x_min y_min z_min
+							  x_max y_max z_max)
+
           (set-cl-kernel-args update-velocities-kernel
                               N timestep_length epsilon sigma
                               m-dev
@@ -359,11 +364,13 @@
             (cl-finish queue)
 
 
-			(display links)
-			(display "\n")
+
 			(display cells)
 			(display "\n")
+			(display links)
 			(display "\n")
-			
+			(display "\n")
+			(display "\n")
+
 
             (cl-finish queue)))))))
