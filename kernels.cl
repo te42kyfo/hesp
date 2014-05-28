@@ -64,13 +64,13 @@ __kernel void update_velocities( const unsigned int N,
 }
 
 __kernel void reset_cells(  const unsigned int N,
-							global long* cells) {
+							global int* cells) {
 	const int globalid = get_global_id(0);
-	cells[globalid] = -23;
+	cells[globalid] = -1;
 }
 
 __kernel void update_cells( const unsigned int N,
-							global long* cells, global long* links,
+							global int* cells, global int* links,
 							global real* px, global  real* py, global real* pz,
 							const real xmin, const real ymin, const real zmin,
 							const real xmax, const real ymax, const real zmax,
@@ -87,11 +87,11 @@ __kernel void update_cells( const unsigned int N,
 	const int yindex = (py[globalid]-ymin) / (ymax-ymin) * ny;
 	const int zindex = (pz[globalid]-zmin) / (zmax-zmin) * nz;
 
-	const int cellindex = zindex * nx*ny + yindex*nx + xindex;
+	size_t cellindex = zindex * nx*ny + yindex*nx + xindex;
 
 
-	//links[globalid] = cells[cellindex];
-	//cells[cellindex] = globalid;
+	links[globalid] = atomic_xchg(cells+cellindex, links[globalid]);
+
 
 }
 
