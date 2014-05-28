@@ -101,6 +101,14 @@ __kernel void reset_cells(  const unsigned int N,
 	cells[globalid] = -1;
 }
 
+__kernel void reset_links(  const unsigned int N,
+							global int* links) {
+	const int globalid = get_global_id(0);
+	if( globalid >= N ) return;
+
+	links[globalid] = globalid;
+}
+
 __kernel void update_cells( const unsigned int N,
 							global int* cells, global int* links,
 							global real* px, global  real* py, global real* pz,
@@ -111,10 +119,6 @@ __kernel void update_cells( const unsigned int N,
 							const unsigned int nz ) {
 	const int globalid = get_global_id(0);
 	if( globalid >= N ) return;
-
-	links[globalid] = globalid;
-
-	barrier( CLK_GLOBAL_MEM_FENCE );
 
 	const int xindex = (px[globalid]-xmin) / (xmax-xmin) * nx;
 	const int yindex = (py[globalid]-ymin) / (ymax-ymin) * ny;
