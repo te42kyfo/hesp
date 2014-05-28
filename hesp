@@ -1,2 +1,3 @@
 #!/bin/bash
-LD_LIBRARY_PATH=`pwd`/guile-opencl/lib guile -e main -s hesp.scm $@
+GUILE_LOAD_PATH=`pwd`/guile-opencl-0.1/modules:GUILE_LOAD_PATH=`pwd`/guile-opencl/modules \
+LD_LIBRARY_PATH=`pwd`/guile-opencl-0.1/lib:`pwd`/guile-opencl/lib guile -e main -s hesp.scm $@
