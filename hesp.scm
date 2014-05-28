@@ -146,7 +146,9 @@
 									 cl_float cl_float cl_float
 									 cl_uint
 									 cl_uint
-									 cl_uint))
+									 cl_uint
+									 cl_float))
+
 		  (update-cells-kernel (make-cl-kernel
                                      program
                                      "update_cells"
@@ -172,12 +174,14 @@
 
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
+						 (display tokens)
                          (let lp ((alist (list))
                                   (token1 (car  tokens))
                                   (token2 (cadr tokens))
                                   (rest   (cddr tokens)))
                            (if (null? rest)
-                               alist
+                               (acons token1 (let ((value (string->number token2)))
+                                                   (if value value token2)) alist)
                                (lp (acons token1 (let ((value (string->number token2)))
                                                    (if value value token2)) alist)
                                    (car  rest)
@@ -206,10 +210,13 @@
 			(x_n      (assoc-ref param-alist "x_n"))
 			(y_n      (assoc-ref param-alist "y_n"))
 			(z_n      (assoc-ref param-alist "z_n"))
+			(r_cut      (assoc-ref param-alist "r_cut"))
+
 
 
             (vtk_out_current 0)
             (part_out_current 0))
+		(display param-alist)
         (let* ((port (open-input-file part_input_file))
                (N     (string->number (read-line port)))
                (px     (make-realvector N 0.0))
@@ -259,7 +266,6 @@
                        (realvector-set! buf i (string->number elem)))
                      buffers line-contents))))
 
-		  (ascii-write N m px py pz vx vy vz (current-output-port) )
 
           (enqueue-write-cl-buffer queue px-dev 0 px)
           (enqueue-write-cl-buffer queue py-dev 0 py)
@@ -294,7 +300,8 @@
 							  cells-dev links-dev
 							  x_min y_min z_min
 							  x_max y_max z_max
-							  x_n y_n z_n)
+							  x_n y_n z_n
+							  r_cut)
 
           (set-cl-kernel-args update-cells-kernel
                               N

@@ -39,7 +39,8 @@ __kernel void update_velocities( const unsigned int N,
 								 const real xmax, const real ymax, const real zmax,
 								 const unsigned int nx,
 								 const unsigned int ny,
-								 const unsigned int nz ) {
+								 const unsigned int nz,
+								 const real r_cut) {
 
 	const int globalid = get_global_id(0);
 	if( globalid >= N ) return;
@@ -81,16 +82,19 @@ __kernel void update_velocities( const unsigned int N,
 						real dz = pz[globalid] - pz[index];
 
 						real sqlength = (dx*dx + dy*dy + dz*dz);
-						real sigma6 = sigma*sigma*sigma*sigma*sigma*sigma;
+						if( sqlength <= r_cut*r_cut) {
 
-						real factor =
-							24.0*epsilon/sqlength *
-							sigma6 / (sqlength*sqlength*sqlength)*
-							(2.0*sigma6 / (sqlength*sqlength*sqlength)-1.0);
+							real sigma6 = sigma*sigma*sigma*sigma*sigma*sigma;
 
-						new_force_x += factor*dx;
-						new_force_y += factor*dy;
-						new_force_z += factor*dz;
+							real factor =
+								24.0*epsilon/sqlength *
+								sigma6 / (sqlength*sqlength*sqlength)*
+								(2.0*sigma6 / (sqlength*sqlength*sqlength)-1.0);
+
+							new_force_x += factor*dx;
+							new_force_y += factor*dy;
+							new_force_z += factor*dz;
+						}
 					}
 					index = links[index];
 				}
