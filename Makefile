@@ -1,8 +1,10 @@
-.PHONY: hesp
+.PHONY: guile-opencl all clean
 
-hesp:
-#	cd guile-opencl && ./configure --prefix=`pwd` && make && make install
-	guild compile hesp
+hesp: guile-opencl
+
+guile-opencl:
+	tar xf guile-opencl-0.1.tar.gz
+	cd guile-opencl-0.1 && ./configure --prefix=`pwd` && make && make install
 
 all:
 	cd guile-opencl && make install -s -j8

@@ -91,12 +91,12 @@
                    buffers)))))
 
 ;; these definitions allow both float and double
-(define real double)
-(define make-realvector make-f64vector)
-(define realvector->list f64vector->list)
-(define typedef-real "typedef double real;\n")
-(define realvector-set! f64vector-set!)
-(define realvector-ref f64vector-ref)
+(define real float)
+(define make-realvector make-f32vector)
+(define realvector->list f32vector->list)
+(define typedef-real "typedef float real;\n")
+(define realvector-set! f32vector-set!)
+(define realvector-ref f32vector-ref)
 
 (define kernels-src
   (string-concatenate
@@ -122,7 +122,7 @@
     (let ((update-positions-kernel  (make-cl-kernel
                                      program
                                      "update_positions"
-                                     cl_uint cl_double cl_buffer
+                                     cl_uint cl_float cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer))
@@ -130,7 +130,7 @@
                                      program
                                      "update_velocities"
                                      cl_uint
-                                     cl_double  cl_double cl_double
+                                     cl_float  cl_float cl_float
                                      cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer

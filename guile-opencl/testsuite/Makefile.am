@@ -1,7 +1,8 @@
 SCM_TESTS = \
 functions/cl-info.scm \
-functions/make-cl-buffer.scm \
 functions/get-cl-platforms.scm \
+functions/make-cl-buffer.scm \
+functions/make-cl-context.scm \
 usage/kernel-invocation.scm
 
 TESTS = ${SCM_TESTS}
