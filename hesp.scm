@@ -135,6 +135,23 @@
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer))
+		  (update-cells-kernel (make-cl-kernel
+                                     program
+                                     "update_cells"
+                                     cl_uint
+                                     cl_buffer cl_buffer
+                                     cl_buffer cl_buffer cl_buffer
+									 cl_double cl_double cl_double
+									 cl_double cl_double cl_double
+									 cl_uint
+									 cl_uint
+									 cl_uint))
+		  (reset-cells-kernel (make-cl-kernel
+                                     program
+                                     "reset_cells"
+                                     cl_uint
+                                     cl_buffer))
+
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
                          (let lp ((alist (list))
@@ -159,6 +176,17 @@
             (vtk_out_freq              (assoc-ref param-alist "vtk_out_freq"))
             (vtk_out_name_base         (assoc-ref param-alist "vtk_out_name_base"))
             (cl_workgroupt_1dsize      (assoc-ref param-alist "workgroup_1dsize"))
+            (x_min      (assoc-ref param-alist "x_min"))
+            (y_min      (assoc-ref param-alist "y_min"))
+            (z_min      (assoc-ref param-alist "z_min"))
+            (x_max      (assoc-ref param-alist "x_max"))
+            (y_max      (assoc-ref param-alist "y_max"))
+            (z_max      (assoc-ref param-alist "z_max"))
+			(x_n      (assoc-ref param-alist "x_n"))
+			(y_n      (assoc-ref param-alist "y_n"))
+			(z_n      (assoc-ref param-alist "z_n"))
+
+
             (vtk_out_current 0)
             (part_out_current 0))
         (let* ((port (open-input-file part_input_file))
@@ -173,6 +201,10 @@
                (fx     (make-realvector N 0.0))
                (fy     (make-realvector N 0.0))
                (fz     (make-realvector N 0.0))
+			   (cells  (make-s64vector (* x_n y_n z_n) -1))
+			   (links  (make-s64vector N -1))
+
+
                (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
                                        (* N (sizeof real))))
                (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
@@ -192,7 +224,12 @@
                (vy-dev (make-cl-buffer context CL_MEM_READ_WRITE
                                        (* N (sizeof real))))
                (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof real)))))
+                                       (* N (sizeof real))))
+               (cells-dev (make-cl-buffer context CL_MEM_READ_WRITE
+										  (* (* x_n y_n z_n) 8)))
+               (links-dev (make-cl-buffer context CL_MEM_READ_WRITE
+										  (* N 8))))
+
           (let ((buffers (list m px py pz vx vy vz)))
             (do ((i 0 (1+ i)))
                 (( >= i N ))
@@ -213,6 +250,9 @@
           (enqueue-write-cl-buffer queue vx-dev 0 vx)
           (enqueue-write-cl-buffer queue vy-dev 0 vy)
           (enqueue-write-cl-buffer queue vz-dev 0 vz)
+		  (enqueue-write-cl-buffer queue cells-dev 0 cells)
+		  (enqueue-write-cl-buffer queue links-dev 0 links)
+
 
           (cl-finish queue)
 
@@ -227,6 +267,16 @@
                               px-dev py-dev pz-dev
                               vx-dev vy-dev vz-dev
                               fx-dev fy-dev fz-dev)
+          (set-cl-kernel-args update-cells-kernel
+                              N
+							  cells-dev links-dev
+							  px-dev py-dev pz-dev
+                              x_min y_min z_min
+							  x_max y_max z_max
+							  x_n y_n z_n)
+          (set-cl-kernel-args reset-cells-kernel
+                              N
+							  cells-dev)
 
           (do ((i 0 (1+ i)))
               (( >= i (/ time_end timestep_length)))
@@ -270,14 +320,24 @@
                                (list 0)
                                (list N)
                                (list N))
-			(cl-finish queue)
+
             (enqueue-cl-kernel queue update-positions-kernel
+                               (list 0)
+                               (list N)
+                               (list N))
+
+			(enqueue-cl-kernel queue reset-cells-kernel
+                               (list 0)
+                               (list (* x_n y_n z_n))
+                               (list (* x_n y_n z_n)))
+
+			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
                                (list N)
                                (list N))
 		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
 
-	
+
             (enqueue-read-cl-buffer queue px-dev 0 px)
             (enqueue-read-cl-buffer queue py-dev 0 py)
             (enqueue-read-cl-buffer queue pz-dev 0 pz)
@@ -287,4 +347,17 @@
             (enqueue-read-cl-buffer queue fx-dev 0 fx)
             (enqueue-read-cl-buffer queue fy-dev 0 fy)
             (enqueue-read-cl-buffer queue fz-dev 0 fz)
+            (enqueue-read-cl-buffer queue cells-dev 0 cells)
+			(enqueue-read-cl-buffer queue links-dev 0 links)
+
+            (cl-finish queue)
+
+
+			(display links)
+			(display "\n")
+			(display cells)
+			(display "\n")
+			(display "\n")
+			
+
             (cl-finish queue)))))))
