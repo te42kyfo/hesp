@@ -141,8 +141,8 @@
                                      cl_uint
                                      cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-									 cl_double cl_double cl_double
-									 cl_double cl_double cl_double
+									 cl_float cl_float cl_float
+									 cl_float cl_float cl_float
 									 cl_uint
 									 cl_uint
 									 cl_uint))
