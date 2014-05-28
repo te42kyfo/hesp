@@ -55,7 +55,7 @@
   (let ((buffers (list px py pz)))
     (do ((i 0 (1+ i)))
         ((>= i N))
-      (format port "~{~,6f~}~%"
+      (format port "~{~,6f ~}~%"
               (map (lambda (vec)
                      (realvector-ref vec i))
                    buffers))))
@@ -91,12 +91,12 @@
                    buffers)))))
 
 ;; these definitions allow both float and double
-(define real float)
-(define make-realvector make-f32vector)
-(define realvector->list f32vector->list)
-(define typedef-real "typedef float real;\n")
-(define realvector-set! f32vector-set!)
-(define realvector-ref f32vector-ref)
+(define real double)
+(define make-realvector make-f64vector)
+(define realvector->list f64vector->list)
+(define typedef-real "typedef double real;\n")
+(define realvector-set! f64vector-set!)
+(define realvector-ref f64vector-ref)
 
 (define kernels-src
   (string-concatenate
@@ -108,6 +108,7 @@
   (if (= 1 (length args))
       (error "main" "please specify a parameter file!" ))
   (let* ((param-file (cadr args))
+         (param-directory (dirname param-file))
          (platform (hesp-select (get-cl-platforms) "platform"))
          (device   (hesp-select (get-cl-devices platform) "device"))
          (context  (make-cl-context device))
@@ -121,7 +122,7 @@
     (let ((update-positions-kernel  (make-cl-kernel
                                      program
                                      "update_positions"
-                                     cl_uint cl_float cl_buffer
+                                     cl_uint cl_double cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer))
@@ -129,7 +130,7 @@
                                      program
                                      "update_velocities"
                                      cl_uint
-                                     cl_float  cl_float cl_float
+                                     cl_double  cl_double cl_double
                                      cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
@@ -147,7 +148,8 @@
                                    (car  rest)
                                    (cadr rest)
                                    (cddr rest)))))))
-      (let ((part_input_file           (assoc-ref param-alist "part_input_file"))
+      (let ((part_input_file
+			 (string-append param-directory "/" ( assoc-ref param-alist "part_input_file")))
             (timestep_length           (assoc-ref param-alist "timestep_length"))
             (time_end                  (assoc-ref param-alist "time_end"))
             (epsilon                   (assoc-ref param-alist "epsilon"))
@@ -172,25 +174,25 @@
                (fy     (make-realvector N 0.0))
                (fz     (make-realvector N 0.0))
                (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (py-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (pz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (m-dev  (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (fx-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (fy-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (fz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (vx-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (vy-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float))))
+                                       (* N (sizeof real))))
                (vz-dev (make-cl-buffer context CL_MEM_READ_WRITE
-                                       (* N (sizeof float)))))
+                                       (* N (sizeof real)))))
           (let ((buffers (list m px py pz vx vy vz)))
             (do ((i 0 (1+ i)))
                 (( >= i N ))
@@ -198,6 +200,8 @@
                 (map (lambda (buf elem)
                        (realvector-set! buf i (string->number elem)))
                      buffers line-contents))))
+
+		  (ascii-write N m px py pz vx vy vz (current-output-port) )
 
           (enqueue-write-cl-buffer queue px-dev 0 px)
           (enqueue-write-cl-buffer queue py-dev 0 py)
@@ -266,11 +270,14 @@
                                (list 0)
                                (list N)
                                (list N))
+			(cl-finish queue)
             (enqueue-cl-kernel queue update-positions-kernel
                                (list 0)
                                (list N)
                                (list N))
+		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
 
+	
             (enqueue-read-cl-buffer queue px-dev 0 px)
             (enqueue-read-cl-buffer queue py-dev 0 py)
             (enqueue-read-cl-buffer queue pz-dev 0 pz)
