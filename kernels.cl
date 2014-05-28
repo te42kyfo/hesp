@@ -63,7 +63,11 @@ __kernel void update_velocities( const unsigned int N,
 
 }
 
-
+__kernel void reset_cells(  const unsigned int N,
+							global long* cells) {
+	const int globalid = get_global_id(0);
+	cells[globalid] = -23;
+}
 
 __kernel void update_cells( const unsigned int N,
 							global long* cells, global long* links,

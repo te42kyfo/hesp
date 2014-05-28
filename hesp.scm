@@ -146,6 +146,11 @@
 									 cl_uint
 									 cl_uint
 									 cl_uint))
+		  (reset-cells-kernel (make-cl-kernel
+                                     program
+                                     "reset_cells"
+                                     cl_uint
+                                     cl_buffer))
 
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
@@ -269,6 +274,9 @@
                               x_min y_min z_min
 							  x_max y_max z_max
 							  x_n y_n z_n)
+          (set-cl-kernel-args reset-cells-kernel
+                              N
+							  cells-dev)
 
           (do ((i 0 (1+ i)))
               (( >= i (/ time_end timestep_length)))
@@ -317,6 +325,11 @@
                                (list 0)
                                (list N)
                                (list N))
+
+			(enqueue-cl-kernel queue reset-cells-kernel
+                               (list 0)
+                               (list (* x_n y_n z_n))
+                               (list (* x_n y_n z_n)))
 
 			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
