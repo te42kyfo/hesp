@@ -349,32 +349,34 @@
                                                        (number->string part_out_current)
                                                        ".out")))
                   (set! part_out_current (1+ part_out_current))))
-            (enqueue-cl-kernel queue update-velocities-kernel
-                               (list 0)
-                               (list (padd-to N cl_workgroup_1dsize))
-                               (list cl_workgroup_1dsize))
 
-            (enqueue-cl-kernel queue update-positions-kernel
-                               (list 0)
-                               (list (padd-to N cl_workgroup_1dsize))
-                               (list cl_workgroup_1dsize))
 
 			(enqueue-cl-kernel queue reset-cells-kernel
                                (list 0)
                                (list (padd-to (* x_n y_n z_n) cl_workgroup_1dsize))
                                (list cl_workgroup_1dsize))
-
+            (cl-finish queue)
 			(enqueue-cl-kernel queue reset-links-kernel
                                (list 0)
                                (list (padd-to (* x_n y_n z_n) cl_workgroup_1dsize))
                                (list cl_workgroup_1dsize))
-
+            (cl-finish queue)
 			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
                                (list (padd-to N cl_workgroup_1dsize))
                                (list cl_workgroup_1dsize))
-
-		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
+            (cl-finish queue)
+            (enqueue-cl-kernel queue update-velocities-kernel
+                               (list 0)
+                               (list (padd-to N cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
+            (cl-finish queue)
+            (enqueue-cl-kernel queue update-positions-kernel
+                               (list 0)
+                               (list (padd-to N cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
+            (cl-finish queue)
+	;		(ascii-write N m px py pz vx vy vz (current-output-port) )
 
 
 
@@ -394,8 +396,8 @@
 
 
 
-;			(display cells)
-;			(display "\n")
+	;		(display cells)
+;			(display "\n");
 ;			(display links)
 ;			(display "\n")
 ;			(display "\n")

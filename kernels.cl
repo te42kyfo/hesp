@@ -14,13 +14,13 @@ __kernel void update_positions( const unsigned int N, const real dt, global real
 	py[globalid] += vy[globalid]*dt + 0.5*fy[globalid]*dt*dt / m[globalid];
 	pz[globalid] += vz[globalid]*dt + 0.5*fz[globalid]*dt*dt / m[globalid];
 
-	if( px[globalid] > xmax ) px[globalid] = xmin + px[globalid] - xmax;
-	if( py[globalid] > ymax ) py[globalid] = ymin + py[globalid] - ymax;
-	if( pz[globalid] > zmax ) pz[globalid] = zmin + pz[globalid] - zmax;
+	if( px[globalid] >= xmax ) px[globalid] = xmin + px[globalid] - xmax;
+	if( py[globalid] >= ymax ) py[globalid] = ymin + py[globalid] - ymax;
+	if( pz[globalid] >= zmax ) pz[globalid] = zmin + pz[globalid] - zmax;
 
-	if( px[globalid] < xmin ) px[globalid] = xmax - xmin + px[globalid];
-	if( py[globalid] < ymin ) py[globalid] = ymax - ymin + py[globalid];
-	if( pz[globalid] < zmin ) pz[globalid] = zmax - zmin + pz[globalid];
+	if( px[globalid] <= xmin ) px[globalid] = xmax - xmin + px[globalid];
+	if( py[globalid] <= ymin ) py[globalid] = ymax - ymin + py[globalid];
+	if( pz[globalid] <= zmin ) pz[globalid] = zmax - zmin + pz[globalid];
 
 
 }
@@ -52,33 +52,50 @@ __kernel void update_velocities( const unsigned int N,
 	const int yindex = (py[globalid]-ymin) / (ymax-ymin) * ny;
 	const int zindex = (pz[globalid]-zmin) / (zmax-zmin) * nz;
 
-	const int cellindex = zindex * nx*ny + yindex*nx + xindex;
-
-
-	int index = cells[cellindex];
 
 
 
-	while( index != -1 ) {
-		if( index != globalid ) {
 
-			real dx = px[globalid] - px[index];
-			real dy = py[globalid] - py[index];
-			real dz = pz[globalid] - pz[index];
 
-			real sqlength = (dx*dx + dy*dy + dz*dz);
-			real sigma6 = sigma*sigma*sigma*sigma*sigma*sigma;
+	for( int iz = -1; iz <= 1; iz++) {
+		for( int iy = -1; iy <= 1; iy++) {
+			for( int ix = -1; ix <= 1; ix++) {
 
-			real factor =
-				24.0*epsilon/sqlength *
-				sigma6 / (sqlength*sqlength*sqlength)*
-				(2.0*sigma6 / (sqlength*sqlength*sqlength)-1.0);
+				int xlocal = xindex+ix;
+				int ylocal = yindex+iy;
+				int zlocal = zindex+iz;
 
-			new_force_x += factor*dx;
-			new_force_y += factor*dy;
-			new_force_z += factor*dz;
+				xlocal %= nx;
+				ylocal %= ny;
+				zlocal %= nz;
+
+				const int cellindex = zlocal * nx*ny + ylocal *nx + xlocal;
+				int index = cells[cellindex];
+
+
+				while( index != -1 ) {
+					if( index != globalid ) {
+
+						real dx = px[globalid] - px[index];
+						real dy = py[globalid] - py[index];
+						real dz = pz[globalid] - pz[index];
+
+						real sqlength = (dx*dx + dy*dy + dz*dz);
+						real sigma6 = sigma*sigma*sigma*sigma*sigma*sigma;
+
+						real factor =
+							24.0*epsilon/sqlength *
+							sigma6 / (sqlength*sqlength*sqlength)*
+							(2.0*sigma6 / (sqlength*sqlength*sqlength)-1.0);
+
+						new_force_x += factor*dx;
+						new_force_y += factor*dy;
+						new_force_z += factor*dz;
+					}
+					index = links[index];
+				}
+			}
 		}
-		index = links[index];
 	}
 
 
