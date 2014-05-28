@@ -113,10 +113,11 @@
          (device   (hesp-select (get-cl-devices platform) "device"))
          (context  (make-cl-context device))
          (queue    (make-cl-queue context device))
-         (program  (build-cl-program
-                    (string->cl-program context kernels-src)
-                    (list device)
-                    ""))
+		 (program  (string->cl-program context kernels-src))
+         (program  (catch #t (lambda () (build-cl-program
+										 program
+										 (list device)
+										 "")) (lambda (key . args) program)))
          (build-log (cl-program-build-info program device CL_PROGRAM_BUILD_LOG)))
     (format #t "=== build-log ===\n~a\n== end of build-log ===\n\n" build-log)
     (let ((update-positions-kernel  (make-cl-kernel
@@ -136,7 +137,13 @@
                                      cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-                                     cl_buffer cl_buffer cl_buffer))
+                                     cl_buffer cl_buffer cl_buffer
+									 cl_buffer cl_buffer
+									 cl_float cl_float cl_float
+									 cl_float cl_float cl_float
+									 cl_uint
+									 cl_uint
+									 cl_uint))
 		  (update-cells-kernel (make-cl-kernel
                                      program
                                      "update_cells"
@@ -271,7 +278,12 @@
                               m-dev
                               px-dev py-dev pz-dev
                               vx-dev vy-dev vz-dev
-                              fx-dev fy-dev fz-dev)
+                              fx-dev fy-dev fz-dev
+							  cells-dev links-dev
+							  x_min y_min z_min
+							  x_max y_max z_max
+							  x_n y_n z_n)
+
           (set-cl-kernel-args update-cells-kernel
                               N
 							  cells-dev links-dev
@@ -279,8 +291,9 @@
                               x_min y_min z_min
 							  x_max y_max z_max
 							  x_n y_n z_n)
+
           (set-cl-kernel-args reset-cells-kernel
-                              N
+                              (* x_n y_n z_n)
 							  cells-dev)
 
           (do ((i 0 (1+ i)))
@@ -324,23 +337,24 @@
             (enqueue-cl-kernel queue update-velocities-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 
             (enqueue-cl-kernel queue update-positions-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 
 			(enqueue-cl-kernel queue reset-cells-kernel
                                (list 0)
                                (list (* x_n y_n z_n))
-                               (list (* x_n y_n z_n)))
+                               (list 1))
 
 			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
                                (list N)
-                               (list N))
+                               (list 1))
 		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
+
 
 
             (enqueue-read-cl-buffer queue px-dev 0 px)
@@ -359,12 +373,12 @@
 
 
 
-			(display cells)
-			(display "\n")
-			(display links)
-			(display "\n")
-			(display "\n")
-			(display "\n")
+;			(display cells)
+;			(display "\n")
+;			(display links)
+;			(display "\n")
+;			(display "\n")
+;			(display "\n")
 
 
             (cl-finish queue)))))))
