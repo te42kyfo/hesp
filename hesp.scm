@@ -157,6 +157,12 @@
                                      cl_uint
                                      cl_buffer))
 
+		  (reset-links-kernel (make-cl-kernel
+                               program
+                               "reset_links"
+                               cl_uint
+                               cl_buffer))
+
           (param-alist (let ((tokens (string-tokenize
                                       (read-string (open-input-file param-file)))))
                          (let lp ((alist (list))
@@ -286,8 +292,11 @@
 							  x_max y_max z_max
 							  x_n y_n z_n)
           (set-cl-kernel-args reset-cells-kernel
-                              N
+                              (* x_n y_n z_n)
 							  cells-dev)
+          (set-cl-kernel-args reset-links-kernel
+                              N
+							  links-dev)
 
           (do ((i 0 (1+ i)))
               (( >= i (/ time_end timestep_length)))
@@ -329,23 +338,28 @@
                   (set! part_out_current (1+ part_out_current))))
             (enqueue-cl-kernel queue update-velocities-kernel
                                (list 0)
-                               (list N)
-                               (list 1))
+                               (list (padd-to N cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
 
             (enqueue-cl-kernel queue update-positions-kernel
                                (list 0)
-                               (list N)
-                               (list 1))
+                               (list (padd-to N cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
 
 			(enqueue-cl-kernel queue reset-cells-kernel
                                (list 0)
-                               (list (* x_n y_n z_n))
-                               (list 1))
+                               (list (padd-to (* x_n y_n z_n) cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
+
+			(enqueue-cl-kernel queue reset-links-kernel
+                               (list 0)
+                               (list (padd-to (* x_n y_n z_n) cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
 
 			(enqueue-cl-kernel queue update-cells-kernel
                                (list 0)
-                               (list N)
-                               (list 1))
+                               (list (padd-to N cl_workgroup_1dsize))
+                               (list cl_workgroup_1dsize))
 		;	(ascii-write N m px py pz vx vy vz (current-output-port) )
 
 

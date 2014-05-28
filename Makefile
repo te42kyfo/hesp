@@ -8,3 +8,6 @@ guile-opencl:
 
 all:
 	cd guile-opencl && make install -s -j8
+
+clean:
+	rm -f *.vtk *.out
