@@ -1,7 +1,9 @@
 __kernel void update_positions( const unsigned int N, const real dt, global real * m,
 								global real * px, global real * py, global real * pz,
 								global real * vx, global real * vy, global real * vz,
-								global real * fx, global real * fy, global real * fz ) {
+								global real * fx, global real * fy, global real * fz,
+								const real xmin, const real ymin, const real zmin,
+								const real xmax, const real ymax, const real zmax) {
 
 
     const int globalid = get_global_id(0);
@@ -11,6 +13,15 @@ __kernel void update_positions( const unsigned int N, const real dt, global real
 	px[globalid] += vx[globalid]*dt + 0.5*fx[globalid]*dt*dt / m[globalid];
 	py[globalid] += vy[globalid]*dt + 0.5*fy[globalid]*dt*dt / m[globalid];
 	pz[globalid] += vz[globalid]*dt + 0.5*fz[globalid]*dt*dt / m[globalid];
+
+	if( px[globalid] > xmax ) px[globalid] = xmin + px[globalid] - xmax;
+	if( py[globalid] > ymax ) py[globalid] = ymin + py[globalid] - ymax;
+	if( pz[globalid] > zmax ) pz[globalid] = zmin + pz[globalid] - zmax;
+
+	if( px[globalid] < xmin ) px[globalid] = xmax - xmin + px[globalid];
+	if( py[globalid] < ymin ) py[globalid] = ymax - ymin + py[globalid];
+	if( pz[globalid] < zmin ) pz[globalid] = zmax - zmin + pz[globalid];
+
 
 }
 
@@ -24,7 +35,7 @@ __kernel void update_velocities( const unsigned int N,
 								 global real * vx, global real * vy, global real * vz,
 								 global real * fx, global real * fy, global real * fz ) {
 
-    const int globalid = get_global_id(0);
+	const int globalid = get_global_id(0);
 	if( globalid >= N ) return;
 
 	real new_force_x = 0;
@@ -66,6 +77,8 @@ __kernel void update_velocities( const unsigned int N,
 __kernel void reset_cells(  const unsigned int N,
 							global int* cells) {
 	const int globalid = get_global_id(0);
+	if( globalid >= N ) return;
+
 	cells[globalid] = -1;
 }
 
@@ -78,6 +91,7 @@ __kernel void update_cells( const unsigned int N,
 							const unsigned int ny,
 							const unsigned int nz ) {
 	const int globalid = get_global_id(0);
+	if( globalid >= N ) return;
 
 	links[globalid] = globalid;
 

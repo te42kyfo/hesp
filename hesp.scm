@@ -125,7 +125,9 @@
                                      cl_uint cl_float cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-                                     cl_buffer cl_buffer cl_buffer))
+                                     cl_buffer cl_buffer cl_buffer
+									 cl_float cl_float cl_float
+									 cl_float cl_float cl_float))
           (update-velocities-kernel (make-cl-kernel
                                      program
                                      "update_velocities"
@@ -260,7 +262,10 @@
                               N timestep_length m-dev
                               px-dev py-dev pz-dev
                               vx-dev vy-dev vz-dev
-                              fx-dev fy-dev fz-dev)
+                              fx-dev fy-dev fz-dev
+							  x_min y_min z_min
+							  x_max y_max z_max)
+
           (set-cl-kernel-args update-velocities-kernel
                               N timestep_length epsilon sigma
                               m-dev
