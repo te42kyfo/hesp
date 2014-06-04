@@ -2,6 +2,9 @@
 -e main -s
 !#
 
+;; this definition allows both float and double precision
+(define double-precision #t)
+
 (setenv "LD_LIBRARY_PATH"
         (string-append
          (getcwd) "/guile-opencl/lib"))
@@ -93,13 +96,32 @@
                      (realvector-ref vec i))
                    buffers)))))
 
-;; these definitions allow both float and double
-(define real float)
-(define make-realvector make-f32vector)
-(define realvector->list f32vector->list)
-(define typedef-real "typedef float real;\n")
-(define realvector-set! f32vector-set!)
-(define realvector-ref f32vector-ref)
+(define real             #f)
+(define make-realvector  #f)
+(define realvector->list #f)
+(define typedef-real     #f)
+(define realvector-set!  #f)
+(define realvector-ref   #f)
+(define cl_real          #f)
+
+(if double-precision
+    (begin
+      (set! real             double)
+      (set! make-realvector  make-f64vector)
+      (set! realvector->list f64vector->list)
+      (set! typedef-real (string-append "typedef double real;\n"
+                                        "#pragma OPENCL EXTENSION cl_khr_fp64: enable\n"))
+      (set! realvector-set!  f64vector-set!)
+      (set! realvector-ref   f64vector-ref)
+      (set! cl_real          cl_double))
+    (begin
+      (set! real             float)
+      (set! make-realvector  make-f32vector)
+      (set! realvector->list f32vector->list)
+      (set! typedef-real     "typedef float real;\n")
+      (set! realvector-set!  f32vector-set!)
+      (set! realvector-ref   f32vector-ref)
+      (set! cl_real          cl_float)))
 
 (define kernels-src
   (string-concatenate
@@ -126,28 +148,28 @@
     (let ((update-positions-kernel  (make-cl-kernel
                                      program
                                      "update_positions"
-                                     cl_uint cl_float cl_buffer
+                                     cl_uint cl_real cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-									 cl_float cl_float cl_float
-									 cl_float cl_float cl_float))
+									 cl_real cl_real cl_real
+									 cl_real cl_real cl_real))
           (update-velocities-kernel (make-cl-kernel
                                      program
                                      "update_velocities"
                                      cl_uint
-                                     cl_float  cl_float cl_float
+                                     cl_real  cl_real cl_real
                                      cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
 									 cl_buffer cl_buffer
-									 cl_float cl_float cl_float
-									 cl_float cl_float cl_float
+									 cl_real cl_real cl_real
+									 cl_real cl_real cl_real
 									 cl_uint
 									 cl_uint
 									 cl_uint
-									 cl_float))
+									 cl_real))
 
 		  (update-cells-kernel (make-cl-kernel
                                      program
@@ -155,8 +177,8 @@
                                      cl_uint
                                      cl_buffer cl_buffer
                                      cl_buffer cl_buffer cl_buffer
-									 cl_float cl_float cl_float
-									 cl_float cl_float cl_float
+									 cl_real cl_real cl_real
+									 cl_real cl_real cl_real
 									 cl_uint
 									 cl_uint
 									 cl_uint))
@@ -211,8 +233,6 @@
 			(z_n      (assoc-ref param-alist "z_n"))
 			(r_cut      (assoc-ref param-alist "r_cut"))
 
-
-
             (vtk_out_current 0)
             (part_out_current 0))
         (let* ((port (open-input-file part_input_file))
@@ -229,7 +249,6 @@
                (fz     (make-realvector N 0.0))
 			   (cells  (make-s32vector (* x_n y_n z_n) -1))
 			   (links  (make-s32vector N -1))
-
 
                (px-dev (make-cl-buffer context CL_MEM_READ_WRITE
                                        (* N (sizeof real))))
@@ -264,7 +283,6 @@
                        (realvector-set! buf i (string->number elem)))
                      buffers line-contents))))
 
-
           (enqueue-write-cl-buffer queue px-dev 0 px)
           (enqueue-write-cl-buffer queue py-dev 0 py)
           (enqueue-write-cl-buffer queue pz-dev 0 pz)
@@ -277,7 +295,6 @@
           (enqueue-write-cl-buffer queue vz-dev 0 vz)
 		  (enqueue-write-cl-buffer queue cells-dev 0 cells)
 		  (enqueue-write-cl-buffer queue links-dev 0 links)
-
 
           (cl-finish queue)
 
@@ -335,6 +352,8 @@
                                                      vtk_out_name_base
                                                      (number->string vtk_out_current)
                                                      ".vtk")))
+                  (display vtk_out_current)
+                  (newline)
                   (set! vtk_out_current (1+ vtk_out_current))))
             (if (= 0 (mod i part_out_freq))
                 (begin
